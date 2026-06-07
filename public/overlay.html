@@ -166,7 +166,14 @@
         video.muted = video.volume <= 0;
         video.addEventListener("ended", () => removeItem(item, "ended"), { once: true });
         video.addEventListener("error", () => removeItem(item, "error"), { once: true });
-        await video.play();
+        try {
+          await video.play();
+        } catch (playError) {
+          // 일반 브라우저 탭은 소리 있는 자동재생을 막을 수 있다(OBS는 허용).
+          // 거부되면 음소거로 한 번 더 시도해 최소한 화면에는 보이도록 한다.
+          video.muted = true;
+          await video.play();
+        }
       }
 
       function playOverlay(event) {

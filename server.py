@@ -37,8 +37,8 @@ PORT = 39291
 OPENAPI_BASE_URL = "https://openapi.chzzk.naver.com"
 AUTH_URL = "https://chzzk.naver.com/account-interlock"
 SOCKET_READ_TIMEOUT_SEC = 10
-WATCHDOG_MIN_STALE_SEC = 180
-WATCHDOG_GRACE_SEC = 120
+WATCHDOG_MIN_STALE_SEC = 90
+WATCHDOG_GRACE_SEC = 45
 RECONNECT_INITIAL_DELAY_SEC = 2
 RECONNECT_MAX_DELAY_SEC = 60
 RECONNECT_JITTER_RATIO = 0.2
@@ -990,7 +990,8 @@ def chzzk_watchdog_loop() -> None:
         if last_frame == 0:
             continue
         elapsed = time.time() - last_frame
-        # 동적 임계값 + 넉넉한 여유. 기본값 기준 max(180, 25 + 20 + 120) = 180초.
+        # 동적 임계값 + 여유. 클라이언트가 25초마다 ping을 보내 프레임이 계속 오므로
+        # 채팅이 없어도 거짓 재연결은 없다. 기본값 기준 max(90, 25 + 20 + 45) = 90초.
         threshold = max(
             WATCHDOG_MIN_STALE_SEC,
             state.get("pingIntervalSec", 25) + state.get("pingTimeoutSec", 20) + WATCHDOG_GRACE_SEC,
@@ -1022,10 +1023,22 @@ def start_chzzk_session() -> None:
 def restart_chzzk_session() -> None:
     global chzzk_thread, chzzk_watchdog_thread
     chzzk_stop_event.set()
+    ws = chzzk_websocket
+    if ws:
+        ws.close()  # 블로킹된 recv_text()를 즉시 깨워 이전 세션 스레드가 빨리 종료되게 한다
     if chzzk_thread and chzzk_thread.is_alive():
-        chzzk_thread.join(timeout=2)
+        chzzk_thread.join(timeout=SOCKET_READ_TIMEOUT_SEC + 2)
     if chzzk_watchdog_thread and chzzk_watchdog_thread.is_alive():
         chzzk_watchdog_thread.join(timeout=2)
+    if chzzk_thread and chzzk_thread.is_alive():
+        # 이전 세션 스레드가 아직 살아 있는데 stop_event를 풀고 새 스레드를 띄우면
+        # 좀비 스레드가 되살아나 같은 사용자로 중복 연결이 생긴다(유저당 최대 3연결 제한).
+        # 종료가 확인될 때까지 stop 상태를 유지하고, 재시도는 사용자에게 맡긴다.
+        update_chzzk_state(
+            connectionState="stopped",
+            lastMessage="이전 연결 종료 대기 중입니다. 잠시 후 다시 시도하세요.",
+        )
+        return
     chzzk_thread = None
     chzzk_watchdog_thread = None
     chzzk_stop_event.clear()
@@ -1042,6 +1055,9 @@ def restart_chzzk_session() -> None:
 
 def stop_chzzk_session() -> None:
     chzzk_stop_event.set()
+    ws = chzzk_websocket
+    if ws:
+        ws.close()  # 소켓을 즉시 닫아 서버 측 연결도 빠르게 정리(유저당 최대 3연결 제한 대비)
     update_chzzk_state(
         connectionState="stopped",
         connected=False,

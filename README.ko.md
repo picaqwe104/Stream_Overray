@@ -1,95 +1,86 @@
-# OBS Reaction Overlay
+# OBS 반응 오버레이
+
+치지직 채팅에 특정 문구가 올라오면 OBS 화면 위에 이미지·영상을 잠깐 띄워주는 프로그램입니다.
+
+> 예) 시청자가 채팅에 `?` 를 치면, 미리 설정해 둔 오버레이가 화면에 잠깐 나타납니다.
+
+방송하는 **내 PC 안에서만** 돌아갑니다(`127.0.0.1`). 외부 서버로 아무것도 보내지 않습니다.
 
 [English README](README.md)
 
-치지직 채팅에 특정 문구가 올라오면 OBS 브라우저 소스 위에 WebM, MP4,
-GIF, PNG 같은 오버레이를 띄우는 로컬 프로그램입니다.
+## 필요한 것
 
-이 앱은 외부 서버가 아니라 방송하는 PC에서 실행됩니다. 로컬 Python 서버가
-`127.0.0.1:39291`에서 컨트롤 페이지와 OBS 오버레이 페이지를 제공하고,
-치지직 OpenAPI 세션을 통해 받은 채팅 이벤트를 OBS로 전달합니다.
+- OBS (방송 프로그램)
+- 이 프로그램 (Windows 실행 파일 또는 Python)
+- 치지직 채팅을 읽기 위한 **치지직 앱 키** (무료, 아래 2번 가이드 참고)
 
-## 현재 상태
+## 1. 프로그램 실행
 
-이 저장소는 공개용 소스와 배포에 필요한 파일만 포함합니다. 실제 배포 전에
-본인의 치지직 Developers 앱으로 장시간 연결 동작을 검증하는 것을 권장합니다.
+**A. 실행 파일로 (가장 쉬움, 추천)**
 
-로컬 credential/token 파일은 커밋하지 마세요.
+1. 받은 폴더의 압축을 풉니다.
+2. `OBS_Reaction_Overlay.exe` 를 더블클릭합니다.
+3. 잠시 뒤 컨트롤 페이지가 자동으로 열립니다. (안 열리면 → http://127.0.0.1:39291/control )
+4. 같이 뜨는 검은 창은 서버 창입니다. **방송 중에는 닫지 마세요.**
 
-- `credentials.json`
-- `chzzk_tokens.json`
-- `chzzk_auth_state.json`
-- `config.json`
-
-## 구성
-
-- `server.py`: 로컬 HTTP API, 치지직 인증/세션 연결, SSE 이벤트 브로드캐스트
-- `public/control.html`: 설정 컨트롤 페이지
-- `public/overlay.html`: OBS 브라우저 소스 페이지
-- `assets/`: 공개 배포 가능한 샘플 오버레이 미디어
-- `README.txt`: Windows 배포 패키지용 상세 사용설명서
-- `Build_Windows_Exe.bat`: PyInstaller Windows 빌드 스크립트
-- `Make_Distribution_Zip.bat`: 공유용 ZIP 생성 스크립트
-
-## 개발 실행
-
-Python 3.12 이상을 권장합니다.
+**B. 소스로 직접 (개발자용)**
 
 ```bash
 python -m venv .venv
-. .venv/bin/activate
+. .venv/bin/activate          # Windows: .venv\Scripts\activate
 python -m pip install -r requirements.txt
 python server.py
 ```
 
-컨트롤 페이지:
+그다음 브라우저에서 http://127.0.0.1:39291/control 을 엽니다.
 
-```text
-http://127.0.0.1:39291/control
-```
+## 2. 치지직 앱 키 발급·등록 (채팅 연동에 필요)
 
-OBS 브라우저 소스 URL:
+실제 채팅을 읽으려면 본인 명의의 치지직 앱 키가 필요합니다. **무료이고 한 번만** 하면 됩니다.
 
-```text
-http://127.0.0.1:39291/overlay
-```
+1. 치지직 개발자 센터에 접속해 로그인합니다. → https://developers.chzzk.naver.com
+2. **애플리케이션 등록**을 누릅니다. 이름은 자유지만 `chzzk`, `치지직`, `naver`, `네이버` 같은 공식 서비스명은 피하세요.
+3. **로그인 리디렉션 URL**에 아래 주소를 **정확히** 입력합니다.
+   ```
+   http://127.0.0.1:39291/auth/chzzk/callback
+   ```
+4. 권한(스코프)에서 **채팅 메시지 조회**를 선택합니다.
+5. 등록을 마치면 **Client ID** 와 **Client Secret** 이 발급됩니다.
+   Client Secret은 비밀번호처럼 다루고 남에게 공유하지 마세요.
+6. 컨트롤 페이지( http://127.0.0.1:39291/control )의 **치지직 앱 정보**에 Client ID·Client Secret을 붙여넣고 **앱 정보 저장**을 누릅니다. (저장하면 화면에는 가려져 보입니다.)
+7. **치지직 로그인**을 눌러 권한 동의를 마칩니다.
+8. **채팅 연결 시작**을 누릅니다. 상태가 `연결: 연결됨`, `구독: 완료` 면 준비 끝입니다.
 
-상태 확인 API:
+> 발급받은 키는 `credentials.json`·`chzzk_tokens.json` 으로 **내 PC에만** 저장됩니다.
+> 폴더를 다른 사람에게 줄 때는 이 파일들을 빼고 보내세요.
 
-```text
-http://127.0.0.1:39291/api/health
-```
+## 3. OBS에 오버레이 연결
 
-## Windows 빌드
-
-아래 파일을 실행합니다.
-
-```bat
-Build_Windows_Exe.bat
-Make_Distribution_Zip.bat
-```
-
-`build/`, `dist/`, `*.zip`은 배포 산출물입니다. 저장소에는 커밋하지 않습니다.
-
-사용자가 직접 추가한 오버레이 미디어는 공개 재배포 권리가 확실한 경우에만
-저장소에 포함하세요.
-
-## OBS 설정 요약
-
-1. OBS에서 브라우저 소스를 추가합니다.
-2. URL에 `http://127.0.0.1:39291/overlay`를 입력합니다.
+1. OBS에서 소스 추가 → **브라우저**를 선택합니다.
+2. URL에 아래 주소를 입력합니다.
+   ```
+   http://127.0.0.1:39291/overlay
+   ```
 3. 브라우저 소스 크기를 오버레이가 나타날 영역에 맞춥니다.
-4. 컨트롤 페이지에서 오버레이와 반응 채팅 문구를 설정합니다.
-5. `입력값 테스트`로 OBS에 오버레이가 보이는지 확인합니다.
+4. 컨트롤 페이지의 **입력값 테스트**로 OBS에 오버레이가 보이는지 확인합니다.
 
-## 치지직 연동 요약
+## 4. 반응 문구·오버레이 설정
 
-1. 치지직 Developers에서 애플리케이션을 등록합니다.
-2. Redirect URI는 `http://127.0.0.1:39291/auth/chzzk/callback`로 설정합니다.
-3. 컨트롤 페이지에 Client ID와 Client Secret을 저장합니다.
-4. 치지직 로그인을 완료합니다.
-5. `채팅 연결 시작`을 눌러 연결 상태와 구독 상태를 확인합니다.
+컨트롤 페이지에서 어떤 채팅에 반응할지(문구), 어떤 이미지/영상을 띄울지, 위치·크기·소리·동시 표시 개수를 설정할 수 있습니다. 채팅 내용이 문구와 **정확히 일치**할 때만 반응합니다.
+
+## 잘 안 될 때
+
+- OBS에 안 보임 → 브라우저 소스 URL이 `http://127.0.0.1:39291/overlay` 인지 확인하고 **입력값 테스트**를 눌러 보세요.
+- 채팅이 안 들어옴 → 상태가 `연결됨`/`완료` 인지 확인 → **재연결**, 그래도 안 되면 **치지직 로그인**을 다시 합니다.
+- 더 자세한 단계별 설명은 `README.txt` 를 참고하세요.
+
+## 개발·빌드
+
+- Windows 실행 파일 만들기: `Build_Windows_Exe.bat` 실행 후 `Make_Distribution_Zip.bat`
+- 구성: `server.py`(로컬 서버·치지직 연동·SSE 전송), `public/control.html`(설정 UI), `public/overlay.html`(OBS 페이지), `assets/`(미디어)
+- 상태 확인 API: http://127.0.0.1:39291/api/health
+- `build/`, `dist/`, `*.zip` 과 로컬 키 파일(`credentials.json`, `chzzk_tokens.json`, `chzzk_auth_state.json`, `config.json`)은 커밋하지 않습니다.
 
 ## 라이선스
 
-MIT. 자세한 내용은 `LICENSE`를 확인하세요.
+MIT. 자세한 내용은 `LICENSE` 를 확인하세요.
