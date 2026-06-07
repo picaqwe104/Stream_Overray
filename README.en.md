@@ -11,9 +11,9 @@ phrase appears in CHZZK chat.
 It runs **only on your own broadcasting PC** (`127.0.0.1`) and sends nothing to any
 external server.
 
-_🎬 A demo GIF will be added soon._
-<!-- Save the demo GIF as screenshots/demo.gif, then uncomment the line below and remove the note above. -->
-<!-- ![Demo](screenshots/demo.gif) -->
+| Type `?` in chat → OBS | Control-page test button → OBS |
+|:---:|:---:|
+| ![Chat reaction demo](screenshots/demo2.gif) | ![Test button demo](screenshots/demo.gif) |
 
 [한국어 README](README.md)
 
@@ -84,10 +84,13 @@ when the chat content **exactly matches** a phrase.
 
 ## Screenshots
 
-_📸 Control page and OBS setup screenshots will be added soon (see the `screenshots/` folder)._
-<!-- Add the files, then uncomment the lines below. -->
-<!-- ![Control page](screenshots/control-page.png) -->
-<!-- ![OBS browser source](screenshots/obs-setup.png) -->
+**Control page** — configure triggers, overlays, position, size, and volume.
+
+![Control page](screenshots/control-page.png)
+
+**OBS browser source** — set the URL to `http://127.0.0.1:39291/overlay`.
+
+![OBS browser source](screenshots/obs-setup.png)
 
 ## Troubleshooting
 

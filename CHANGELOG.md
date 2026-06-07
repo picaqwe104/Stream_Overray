@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - README now shows a download link to the latest release at the top.
 - The main `README.md` is now Korean; the English version moved to `README.en.md`.
-- Added placeholder slots and a `screenshots/` folder for the demo GIF and screenshots.
+- README now includes demo GIFs and screenshots (control page, OBS source setup).
 
 ## [1.0.0] - 2026-06-07
 

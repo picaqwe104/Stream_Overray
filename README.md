@@ -8,9 +8,9 @@
 
 방송하는 **내 PC 안에서만** 돌아갑니다(`127.0.0.1`). 외부 서버로 아무것도 보내지 않습니다.
 
-_🎬 동작 데모는 준비되는 대로 추가됩니다._
-<!-- 데모 GIF를 screenshots/demo.gif 로 저장한 뒤, 아래 줄의 주석을 풀고 위 안내 줄은 지우세요. -->
-<!-- ![동작 데모](screenshots/demo.gif) -->
+| 채팅에 `?` 입력 → OBS | 컨트롤 페이지 테스트 버튼 → OBS |
+|:---:|:---:|
+| ![채팅 반응 데모](screenshots/demo2.gif) | ![테스트 버튼 데모](screenshots/demo.gif) |
 
 [English README](README.en.md)
 
@@ -76,10 +76,13 @@ python server.py
 
 ## 스크린샷
 
-_📸 컨트롤 페이지·OBS 설정 화면은 준비되는 대로 추가됩니다. (`screenshots/` 폴더 참고)_
-<!-- 파일 추가 후 아래 줄의 주석을 푸세요. -->
-<!-- ![컨트롤 페이지](screenshots/control-page.png) -->
-<!-- ![OBS 브라우저 소스 설정](screenshots/obs-setup.png) -->
+**컨트롤 페이지** — 트리거·오버레이·위치·크기·볼륨 등을 설정합니다.
+
+![컨트롤 페이지](screenshots/control-page.png)
+
+**OBS 브라우저 소스 설정** — URL에 `http://127.0.0.1:39291/overlay` 를 입력합니다.
+
+![OBS 브라우저 소스 설정](screenshots/obs-setup.png)
 
 ## 잘 안 될 때
 
