@@ -1,34 +1,31 @@
-# OBS Reaction Overlay
+# OBS 반응 오버레이
 
-A program that briefly shows an image or video on your OBS screen when a specific
-phrase appears in CHZZK chat.
+치지직 채팅에 특정 문구가 올라오면 OBS 화면 위에 이미지·영상을 잠깐 띄워주는 프로그램입니다.
 
-**⬇️ [Download the latest Windows release](https://github.com/picaqwe104/Stream_Overray/releases/latest)** — unzip anywhere and double-click `OBS_Reaction_Overlay.exe`. No installation needed.
+**⬇️ [최신 Windows 릴리즈 다운로드](https://github.com/picaqwe104/Stream_Overray/releases/latest)** — 압축을 풀고 `OBS_Reaction_Overlay.exe` 를 더블클릭하세요. 설치는 필요 없습니다.
 
-> Example: when a viewer types `?` in chat, an overlay you configured pops up on
-> screen for a moment.
+> 예) 시청자가 채팅에 `?` 를 치면, 미리 설정해 둔 오버레이가 화면에 잠깐 나타납니다.
 
-It runs **only on your own broadcasting PC** (`127.0.0.1`) and sends nothing to any
-external server.
+방송하는 **내 PC 안에서만** 돌아갑니다(`127.0.0.1`). 외부 서버로 아무것도 보내지 않습니다.
 
-[한국어 README](README.ko.md)
+[English README](README.md)
 
-## What you need
+## 필요한 것
 
-- OBS (your streaming software)
-- This program (a Windows executable, or Python)
-- A **CHZZK app key** to read chat — free; see step 2 below
+- OBS (방송 프로그램)
+- 이 프로그램 (Windows 실행 파일 또는 Python)
+- 치지직 채팅을 읽기 위한 **치지직 앱 키** (무료, 아래 2번 가이드 참고)
 
-## 1. Run the program
+## 1. 프로그램 실행
 
-**A. From the executable (easiest, recommended)**
+**A. 실행 파일로 (가장 쉬움, 추천)**
 
-1. Unzip the folder you received.
-2. Double-click `OBS_Reaction_Overlay.exe`.
-3. The control page opens automatically after a moment. (If not → http://127.0.0.1:39291/control )
-4. The black window that appears is the server. **Don't close it while streaming.**
+1. 받은 폴더의 압축을 풉니다.
+2. `OBS_Reaction_Overlay.exe` 를 더블클릭합니다.
+3. 잠시 뒤 컨트롤 페이지가 자동으로 열립니다. (안 열리면 → http://127.0.0.1:39291/control )
+4. 같이 뜨는 검은 창은 서버 창입니다. **방송 중에는 닫지 마세요.**
 
-**B. From source (for developers)**
+**B. 소스로 직접 (개발자용)**
 
 ```bash
 python -m venv .venv
@@ -37,69 +34,62 @@ python -m pip install -r requirements.txt
 python server.py
 ```
 
-Then open http://127.0.0.1:39291/control in your browser.
+그다음 브라우저에서 http://127.0.0.1:39291/control 을 엽니다.
 
-## 2. Get and register a CHZZK app key (needed for chat)
+## 2. 치지직 앱 키 발급·등록 (채팅 연동에 필요)
 
-To read real chat you need your own CHZZK app key. It's **free and a one-time** setup.
+실제 채팅을 읽으려면 본인 명의의 치지직 앱 키가 필요합니다. **무료이고 한 번만** 하면 됩니다.
 
-1. Open the CHZZK developer center and sign in. → https://developers.chzzk.naver.com
-2. Register a new application. Any name is fine, but avoid official service names like `chzzk`, `치지직`, `naver`, `네이버`.
-3. Set the **login redirect URL** to exactly:
+1. 치지직 개발자 센터에 접속해 로그인합니다. → https://developers.chzzk.naver.com
+2. **애플리케이션 등록**을 누릅니다. 이름은 자유지만 `chzzk`, `치지직`, `naver`, `네이버` 같은 공식 서비스명은 피하세요.
+3. **로그인 리디렉션 URL**에 아래 주소를 **정확히** 입력합니다.
    ```
    http://127.0.0.1:39291/auth/chzzk/callback
    ```
-4. For the permission (scope), select **read chat messages** (채팅 메시지 조회).
-5. After registering you get a **Client ID** and **Client Secret**.
-   Treat the Client Secret like a password — never share it.
-6. On the control page ( http://127.0.0.1:39291/control ), paste the Client ID and
-   Client Secret into **치지직 앱 정보** and click **앱 정보 저장** (save). They are
-   masked on screen after saving.
-7. Click **치지직 로그인** (log in) and approve the permission.
-8. Click **채팅 연결 시작** (start). When the status shows `연결: 연결됨` (connected)
-   and `구독: 완료` (subscribed), you're ready.
+4. 권한(스코프)에서 **채팅 메시지 조회**를 선택합니다.
+5. 등록을 마치면 **Client ID** 와 **Client Secret** 이 발급됩니다.
+   Client Secret은 비밀번호처럼 다루고 남에게 공유하지 마세요.
+6. 컨트롤 페이지( http://127.0.0.1:39291/control )의 **치지직 앱 정보**에 Client ID·Client Secret을 붙여넣고 **앱 정보 저장**을 누릅니다. (저장하면 화면에는 가려져 보입니다.)
+7. **치지직 로그인**을 눌러 권한 동의를 마칩니다.
+8. **채팅 연결 시작**을 누릅니다. 상태가 `연결: 연결됨`, `구독: 완료` 면 준비 끝입니다.
 
-> Your keys are saved **only on your PC** in `credentials.json` / `chzzk_tokens.json`.
-> If you share the folder with someone, leave those files out.
+> 발급받은 키는 `credentials.json`·`chzzk_tokens.json` 으로 **내 PC에만** 저장됩니다.
+> 폴더를 다른 사람에게 줄 때는 이 파일들을 빼고 보내세요.
 
-## 3. Connect the overlay to OBS
+## 3. OBS에 오버레이 연결
 
-1. In OBS, add a source → **Browser**.
-2. Set the URL to:
+1. OBS에서 소스 추가 → **브라우저**를 선택합니다.
+2. URL에 아래 주소를 입력합니다.
    ```
    http://127.0.0.1:39291/overlay
    ```
-3. Size the browser source to the area where overlays should appear.
-4. Click **입력값 테스트** (test) on the control page to confirm the overlay shows in OBS.
+3. 브라우저 소스 크기를 오버레이가 나타날 영역에 맞춥니다.
+4. 컨트롤 페이지의 **입력값 테스트**로 OBS에 오버레이가 보이는지 확인합니다.
 
-## 4. Configure phrases and overlays
+## 4. 반응 문구·오버레이 설정
 
-On the control page you set which chat phrases to react to, which image/video to
-show, and position / size / volume / how many show at once. A reaction fires only
-when the chat content **exactly matches** a phrase.
+컨트롤 페이지에서 어떤 채팅에 반응할지(문구), 어떤 이미지/영상을 띄울지, 위치·크기·소리·동시 표시 개수를 설정할 수 있습니다. 채팅 내용이 문구와 **정확히 일치**할 때만 반응합니다.
 
-## Troubleshooting
+## 잘 안 될 때
 
-- Nothing in OBS → check the browser source URL is `http://127.0.0.1:39291/overlay`, then use **입력값 테스트**.
-- No chat coming in → check the status reads connected/subscribed, click **재연결** (reconnect); if it still fails, log in again with **치지직 로그인**.
-- For detailed step-by-step instructions, see `README.txt` (Korean).
+- OBS에 안 보임 → 브라우저 소스 URL이 `http://127.0.0.1:39291/overlay` 인지 확인하고 **입력값 테스트**를 눌러 보세요.
+- 채팅이 안 들어옴 → 상태가 `연결됨`/`완료` 인지 확인 → **재연결**, 그래도 안 되면 **치지직 로그인**을 다시 합니다.
+- 더 자세한 단계별 설명은 `README.txt` 를 참고하세요.
 
-## Development & build
+## 개발·빌드
 
-- Build a Windows executable: run `Build_Windows_Exe.bat`, then `Make_Distribution_Zip.bat`.
-- Layout: `server.py` (local server, CHZZK integration, SSE broadcast),
-  `public/control.html` (settings UI), `public/overlay.html` (OBS page), `assets/` (media).
-- Health endpoint: http://127.0.0.1:39291/api/health
-- `build/`, `dist/`, `*.zip` and local key files (`credentials.json`,
-  `chzzk_tokens.json`, `chzzk_auth_state.json`, `config.json`) are not committed.
+- Windows 실행 파일 만들기: `Build_Windows_Exe.bat` 실행 후 `Make_Distribution_Zip.bat`
+- 구성: `server.py`(로컬 서버·치지직 연동·SSE 전송), `public/control.html`(설정 UI), `public/overlay.html`(OBS 페이지), `assets/`(미디어)
+- 상태 확인 API: http://127.0.0.1:39291/api/health
+- `build/`, `dist/`, `*.zip` 과 로컬 키 파일(`credentials.json`, `chzzk_tokens.json`, `chzzk_auth_state.json`, `config.json`)은 커밋하지 않습니다.
 
-## Versioning
+## 버전 관리
 
-This project follows [Semantic Versioning](https://semver.org/) (`vMAJOR.MINOR.PATCH`).
-Notable changes are recorded in [CHANGELOG.md](CHANGELOG.md), and each release is published
-on the [GitHub Releases](https://github.com/picaqwe104/Stream_Overray/releases) page with the
-Windows package attached. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
+이 프로젝트는 [유의적 버전(SemVer)](https://semver.org/lang/ko/)을 따릅니다(`vMAJOR.MINOR.PATCH`).
+변경 내역은 [CHANGELOG.md](CHANGELOG.md) 에 기록하며, 릴리즈는
+[GitHub Releases](https://github.com/picaqwe104/Stream_Overray/releases) 에 Windows 패키지를 첨부해 배포합니다.
+커밋 메시지는 [Conventional Commits](https://www.conventionalcommits.org/) 형식을 따릅니다.
 
-## License
+## 라이선스
 
-MIT. See `LICENSE`.
+MIT. 자세한 내용은 `LICENSE` 를 확인하세요.
