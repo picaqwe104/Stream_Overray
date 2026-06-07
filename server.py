@@ -34,6 +34,7 @@ TOKENS_PATH = ROOT / "chzzk_tokens.json"
 AUTH_STATE_PATH = ROOT / "chzzk_auth_state.json"
 HOST = "127.0.0.1"
 PORT = 39291
+APP_VERSION = "1.0.0"
 OPENAPI_BASE_URL = "https://openapi.chzzk.naver.com"
 AUTH_URL = "https://chzzk.naver.com/account-interlock"
 SOCKET_READ_TIMEOUT_SEC = 10
@@ -322,6 +323,7 @@ def build_health_status() -> dict:
     config = load_config()
     return {
         "ok": True,
+        "version": APP_VERSION,
         "server": {
             "host": HOST,
             "port": PORT,
@@ -1099,7 +1101,7 @@ def parse_multipart_upload(handler: BaseHTTPRequestHandler) -> tuple[str, bytes]
 
 
 class PingOverlayHandler(BaseHTTPRequestHandler):
-    server_version = "MiaPingLocal/0.2"
+    server_version = f"OBSReactionOverlay/{APP_VERSION}"
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
