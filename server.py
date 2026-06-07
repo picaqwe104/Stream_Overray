@@ -60,8 +60,8 @@ SUPPORTED_ASSET_EXTENSIONS = {
 
 DEFAULT_OVERLAY = {
     "id": "sample-ping",
-    "name": "Sample Ping",
-    "asset": "sample-ping.svg",
+    "name": "미아핑",
+    "asset": "mia-ping-alpha.webm",
     "triggers": ["?", "??", "???"],
     "enabled": True,
 }

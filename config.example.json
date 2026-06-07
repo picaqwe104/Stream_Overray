@@ -10,8 +10,8 @@
   "overlays": [
     {
       "id": "sample-ping",
-      "name": "Sample Ping",
-      "asset": "sample-ping.svg",
+      "name": "미아핑",
+      "asset": "mia-ping-alpha.webm",
       "triggers": [
         "?",
         "??",

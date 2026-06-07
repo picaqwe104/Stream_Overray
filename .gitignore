@@ -33,10 +33,12 @@ dist/
 *.zip
 *.exe
 
-# Local/private overlay media. The public repository ships only the sample SVG.
+# Local/private overlay media. The public repo ships the sample SVG and the
+# sample video (mia-ping-alpha.webm); other user media stays local.
 assets/*.webm
 assets/*.mp4
 assets/*.mov
+!assets/mia-ping-alpha.webm
 
 # OS/editor noise
 .DS_Store
