@@ -42,6 +42,10 @@
       let sequence = 0;
       let lastAction = "ready";
 
+      // 오버레이가 화면에 영원히 남지 않도록 하는 자동 숨김 시간.
+      const IMAGE_DISPLAY_MS = 5000; // 이미지/GIF 등 자연 종료가 없는 자산은 이 시간 뒤 제거
+      const VIDEO_SAFETY_MS = 30000; // 영상은 재생 종료(ended) 시 제거되며, 이건 만약을 위한 안전 타이머
+
       function randomBetween(min, max) {
         return max <= min ? min : Math.random() * (max - min) + min;
       }
@@ -86,7 +90,7 @@
           document.body.appendChild(debugElement);
         }
         debugElement.textContent = [
-          "overlay build: 2026-05-20-simple-video-blob",
+          "overlay build: 2026-06-07-auto-hide",
           `active: ${activeItems.length}`,
           `maxVisible: ${Math.max(1, Number(settings.maxVisible) || 1)}`,
           `last: ${lastAction}`,
@@ -99,6 +103,10 @@
           return;
         }
         item.removed = true;
+        if (item.hideTimer) {
+          clearTimeout(item.hideTimer);
+          item.hideTimer = null;
+        }
 
         const index = activeItems.indexOf(item);
         if (index >= 0) {
@@ -187,12 +195,17 @@
           element: document.createElement(isVideo(overlay.asset) ? "video" : "img"),
           objectUrl: "",
           removed: false,
+          hideTimer: null,
         };
 
         activeItems.push(item);
         trimActiveItems();
         placeElement(item.element, item);
         document.body.appendChild(item.element);
+
+        // 재생 후 일정 시간이 지나면 자동으로 제거(영원히 남는 문제 방지).
+        const lifespan = isVideo(overlay.asset) ? VIDEO_SAFETY_MS : IMAGE_DISPLAY_MS;
+        item.hideTimer = setTimeout(() => removeItem(item, "timeout"), lifespan);
 
         if (isVideo(overlay.asset)) {
           loadVideo(item, assetUrl).catch(() => removeItem(item, "play-failed"));
