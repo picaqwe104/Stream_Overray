@@ -3,6 +3,8 @@
 A program that briefly shows an image or video on your OBS screen when a specific
 phrase appears in CHZZK chat.
 
+**⬇️ [Download the latest Windows release](https://github.com/picaqwe104/Stream_Overray/releases/latest)** — unzip anywhere and double-click `OBS_Reaction_Overlay.exe`. No installation needed.
+
 > Example: when a viewer types `?` in chat, an overlay you configured pops up on
 > screen for a moment.
 
