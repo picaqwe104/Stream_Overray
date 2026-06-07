@@ -76,11 +76,22 @@ To read real chat you need your own CHZZK app key. It's **free and a one-time** 
 3. Size the browser source to the area where overlays should appear.
 4. Click **입력값 테스트** (test) on the control page to confirm the overlay shows in OBS.
 
-## 4. Configure phrases and overlays
+## 4. Add an overlay (empty by default)
 
-On the control page you set which chat phrases to react to, which image/video to
-show, and position / size / volume / how many show at once. A reaction fires only
-when the chat content **exactly matches** a phrase.
+A fresh install has **no overlays** — you must add one before chat or the test
+button does anything.
+
+1. On the control page, click **반응 오버레이 → 오버레이 추가** (Reaction overlays → Add overlay).
+2. Enter an overlay **name** (for your own reference).
+3. **Upload** an image/video, or drop a file into the `assets` folder and type its filename.
+   - Supported: `svg, webm, mp4, mov, gif, png, jpg, jpeg, webp`
+   - You can test with the included `sample-ping.svg`.
+4. Add **trigger phrases**, one per line (e.g. `?`, `??`). A reaction fires only when chat **exactly matches** a phrase.
+5. Tick **이 오버레이 사용** (use this overlay).
+6. Click **전체 설정 저장** (save all settings).
+7. Use **입력값 테스트** (test) to confirm it appears in OBS.
+
+The **표시 방식** (display) panel controls position (random/fixed), size, padding, volume, and how many show at once.
 
 ## Screenshots
 
@@ -116,17 +127,20 @@ Windows package attached. Commit messages follow [Conventional Commits](https://
 
 ## Credits / Attribution
 
-The default sample overlay `mia-ping-alpha.webm` is the **"missing ping"
-(question-mark ping) animation from League of Legends**, which is the
-intellectual property of Riot Games, Inc. Obtained from (not the original
-source): [cromakeyuploader blog](https://cromakeyuploader.tistory.com/entry/%EB%A1%A4-%EB%AC%BC%EC%9D%8C%ED%91%9C-%ED%95%91-LOL-question-mark-green-screen).
-It is included only as a non-commercial fan sample under Riot Games'
-["Legal Jibber Jabber"](https://www.riotgames.com/en/legal) policy.
+This repository and the distribution package **bundle no game assets.** A fresh
+install starts with an empty overlay list; you add your own media.
+
+The question-mark ping shown in the demo GIFs is the **League of Legends "missing
+ping" animation** (intellectual property of Riot Games, Inc.), shown **for
+illustration only**. ([Obtained from](https://cromakeyuploader.tistory.com/entry/%EB%A1%A4-%EB%AC%BC%EC%9D%8C%ED%91%9C-%ED%95%91-LOL-question-mark-green-screen) — not the original source.)
+
+If you add League of Legends / Riot Games assets **yourself**, Riot's
+["Legal Jibber Jabber"](https://www.riotgames.com/en/legal) policy permits
+**non-commercial fan use only** and requires this disclaimer:
 
 > OBS Reaction Overlay was created under Riot Games' "Legal Jibber Jabber" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.
 
-⚠️ **Non-commercial use only** (no selling, donations, or crowdfunding). To use
-or redistribute this commercially, replace the sample with media you own or are
+For commercial use (selling, donations, crowdfunding), use media you own or are
 licensed to use. See [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt). (Not legal advice.)
 
 ## License

@@ -59,11 +59,13 @@ SUPPORTED_ASSET_EXTENSIONS = {
     ".webp",
 }
 
+# Template used only to normalize user-defined overlays. No overlay ships by
+# default: the initial config has an empty overlay list and the user adds their own.
 DEFAULT_OVERLAY = {
-    "id": "sample-ping",
-    "name": "미아핑",
-    "asset": "mia-ping-alpha.webm",
-    "triggers": ["?", "??", "???"],
+    "id": "overlay",
+    "name": "오버레이",
+    "asset": "sample-ping.svg",
+    "triggers": ["?"],
     "enabled": True,
 }
 
@@ -76,7 +78,7 @@ DEFAULT_CONFIG = {
     "padding": 24,
     "maxVisible": 5,
     "volume": 100,
-    "overlays": [DEFAULT_OVERLAY],
+    "overlays": [],
 }
 
 clients: set[queue.Queue[str]] = set()
@@ -136,8 +138,8 @@ def normalize_config(raw_config: dict | None) -> dict:
     config["volume"] = int(clamp_number(config.get("volume"), 0, 100, DEFAULT_CONFIG["volume"]))
 
     overlays = config.get("overlays")
-    if not isinstance(overlays, list) or not overlays:
-        overlays = [DEFAULT_OVERLAY]
+    if not isinstance(overlays, list):
+        overlays = []
     config["overlays"] = [normalize_overlay(item, index) for index, item in enumerate(overlays)]
     return config
 
@@ -444,7 +446,7 @@ def overlay_matches(overlay: dict, content: str) -> bool:
     return False
 
 
-def find_overlay(config: dict, overlay_id: str | None = None, content: str | None = None) -> dict:
+def find_overlay(config: dict, overlay_id: str | None = None, content: str | None = None) -> dict | None:
     overlays = config.get("overlays", [])
     if overlay_id:
         for overlay in overlays:
@@ -456,7 +458,7 @@ def find_overlay(config: dict, overlay_id: str | None = None, content: str | Non
             if overlay_matches(overlay, content):
                 return overlay
 
-    return overlays[0]
+    return overlays[0] if overlays else None
 
 
 def guess_level(content: str, overlay: dict) -> int:
@@ -472,6 +474,8 @@ def build_overlay_event(
 ) -> tuple[dict | None, str | None]:
     config = load_config()
     overlay = find_overlay(config, overlay_id=overlay_id, content=content)
+    if overlay is None:
+        return None, "no_overlay_configured"
 
     if content is not None and not overlay_matches(overlay, content):
         return None, "no_matching_overlay"
@@ -1321,6 +1325,9 @@ class PingOverlayHandler(BaseHTTPRequestHandler):
     ) -> None:
         config = load_config()
         overlay = find_overlay(config, overlay_id=overlay_id, content=content)
+        if overlay is None:
+            self.send_json({"ok": False, "reason": "no_overlay_configured"})
+            return
 
         if content is not None and not overlay_matches(overlay, content):
             self.send_json({"ok": False, "reason": "no_matching_overlay"})

@@ -8,13 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Attribution and the Riot Games "Legal Jibber Jabber" disclaimer for the bundled
-  League of Legends sample animation (`mia-ping-alpha.webm`).
+- README section explaining how to add an overlay (the initial overlay list is now empty).
 
 ### Changed
 - README now shows a download link to the latest release at the top.
 - The main `README.md` is now Korean; the English version moved to `README.en.md`.
 - README now includes demo GIFs and screenshots (control page, OBS source setup).
+
+### Removed
+- The bundled League of Legends ping sample (`mia-ping-alpha.webm`, Riot Games IP).
+  Fresh installs now start with no overlays; users add their own media. The demo
+  media still depicts the ping for illustration, with attribution retained.
 
 ## [1.0.0] - 2026-06-07
 

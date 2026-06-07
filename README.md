@@ -70,9 +70,21 @@ python server.py
 3. 브라우저 소스 크기를 오버레이가 나타날 영역에 맞춥니다.
 4. 컨트롤 페이지의 **입력값 테스트**로 OBS에 오버레이가 보이는지 확인합니다.
 
-## 4. 반응 문구·오버레이 설정
+## 4. 오버레이 추가하기 (처음엔 비어 있음)
 
-컨트롤 페이지에서 어떤 채팅에 반응할지(문구), 어떤 이미지/영상을 띄울지, 위치·크기·소리·동시 표시 개수를 설정할 수 있습니다. 채팅 내용이 문구와 **정확히 일치**할 때만 반응합니다.
+처음 실행하면 등록된 오버레이가 **하나도 없습니다.** 직접 추가해야 채팅·테스트에 반응합니다.
+
+1. 컨트롤 페이지에서 **반응 오버레이 → 오버레이 추가** 를 누릅니다.
+2. **오버레이명** 을 입력합니다(관리용 이름).
+3. **파일 업로드** 로 이미지/영상을 올립니다. (또는 `assets` 폴더에 파일을 직접 넣고 파일명을 입력)
+   - 지원 형식: `svg, webm, mp4, mov, gif, png, jpg, jpeg, webp`
+   - 동봉된 `sample-ping.svg` 로 먼저 테스트해볼 수 있습니다.
+4. **반응 채팅** 에 트리거 문구를 한 줄에 하나씩 넣습니다(예: `?`, `??`). 채팅 내용과 **정확히 일치**할 때만 반응합니다.
+5. **이 오버레이 사용** 을 체크합니다.
+6. **전체 설정 저장** 을 누릅니다.
+7. **입력값 테스트** 로 OBS에 뜨는지 확인합니다.
+
+위쪽 **표시 방식** 에서 위치(랜덤/고정)·크기·여백·볼륨·동시 표시 개수를 조절할 수 있습니다.
 
 ## 스크린샷
 
@@ -106,11 +118,15 @@ python server.py
 
 ## 크레딧 / 저작권
 
-기본 샘플 오버레이 `mia-ping-alpha.webm` 는 **리그 오브 레전드(League of Legends)의 "미아핑(물음표 핑)" 애니메이션**으로, 저작권은 Riot Games, Inc. 에 있습니다. 받은 곳(원출처 아님): [cromakeyuploader 블로그](https://cromakeyuploader.tistory.com/entry/%EB%A1%A4-%EB%AC%BC%EC%9D%8C%ED%91%9C-%ED%95%91-LOL-question-mark-green-screen). 비영리 팬 샘플로만 포함했으며 Riot의 ["Legal Jibber Jabber"](https://www.riotgames.com/en/legal) 정책을 따릅니다.
+이 저장소와 배포 패키지에는 **게임 에셋이 포함되어 있지 않습니다.** 기본 상태는 오버레이가 비어 있고, 사용자가 직접 미디어를 추가합니다.
+
+데모 GIF에 보이는 물음표 핑은 **리그 오브 레전드의 "미아핑"** 애니메이션(저작권: Riot Games, Inc.)으로 **설명용으로만** 표시됩니다. ([받은 곳](https://cromakeyuploader.tistory.com/entry/%EB%A1%A4-%EB%AC%BC%EC%9D%8C%ED%91%9C-%ED%95%91-LOL-question-mark-green-screen) — 원출처 아님)
+
+LoL 등 Riot 게임 에셋을 **직접 추가해서** 쓰는 경우, Riot의 ["Legal Jibber Jabber"](https://www.riotgames.com/en/legal) 정책상 **비영리 팬 사용만 허용**되며 다음 고지가 필요합니다:
 
 > OBS Reaction Overlay was created under Riot Games' "Legal Jibber Jabber" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.
 
-⚠️ **상업적 사용 불가**(판매·후원·크라우드펀딩 등). 상업적으로 쓰거나 재배포하려면 본인이 권리를 가진 미디어로 교체하세요. 자세한 내용은 [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt) 참고. (법률 자문 아님)
+상업적 사용(판매·후원·크라우드펀딩 등) 시에는 본인이 권리를 가진 미디어를 사용하세요. 자세한 내용은 [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt). (법률 자문 아님)
 
 ## 라이선스
 

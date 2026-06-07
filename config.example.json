@@ -7,17 +7,5 @@
   "padding": 24,
   "maxVisible": 5,
   "volume": 100,
-  "overlays": [
-    {
-      "id": "sample-ping",
-      "name": "미아핑",
-      "asset": "mia-ping-alpha.webm",
-      "triggers": [
-        "?",
-        "??",
-        "???"
-      ],
-      "enabled": true
-    }
-  ]
+  "overlays": []
 }
