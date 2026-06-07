@@ -74,7 +74,7 @@ To read real chat you need your own CHZZK app key. It's **free and a one-time** 
    http://127.0.0.1:39291/overlay
    ```
 3. Size the browser source to the area where overlays should appear.
-4. Click **입력값 테스트** (test) on the control page to confirm the overlay shows in OBS.
+4. Click **입력값 테스트** (test) on the control page to confirm the overlay shows in OBS. (If you have no overlays yet, add one in step 4 first.)
 
 ## 4. Add an overlay (empty by default)
 
