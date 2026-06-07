@@ -11,7 +11,11 @@ phrase appears in CHZZK chat.
 It runs **only on your own broadcasting PC** (`127.0.0.1`) and sends nothing to any
 external server.
 
-[한국어 README](README.ko.md)
+_🎬 A demo GIF will be added soon._
+<!-- Save the demo GIF as screenshots/demo.gif, then uncomment the line below and remove the note above. -->
+<!-- ![Demo](screenshots/demo.gif) -->
+
+[한국어 README](README.md)
 
 ## What you need
 
@@ -77,6 +81,13 @@ To read real chat you need your own CHZZK app key. It's **free and a one-time** 
 On the control page you set which chat phrases to react to, which image/video to
 show, and position / size / volume / how many show at once. A reaction fires only
 when the chat content **exactly matches** a phrase.
+
+## Screenshots
+
+_📸 Control page and OBS setup screenshots will be added soon (see the `screenshots/` folder)._
+<!-- Add the files, then uncomment the lines below. -->
+<!-- ![Control page](screenshots/control-page.png) -->
+<!-- ![OBS browser source](screenshots/obs-setup.png) -->
 
 ## Troubleshooting
 
