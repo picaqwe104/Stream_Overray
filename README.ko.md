@@ -81,6 +81,13 @@ python server.py
 - 상태 확인 API: http://127.0.0.1:39291/api/health
 - `build/`, `dist/`, `*.zip` 과 로컬 키 파일(`credentials.json`, `chzzk_tokens.json`, `chzzk_auth_state.json`, `config.json`)은 커밋하지 않습니다.
 
+## 버전 관리
+
+이 프로젝트는 [유의적 버전(SemVer)](https://semver.org/lang/ko/)을 따릅니다(`vMAJOR.MINOR.PATCH`).
+변경 내역은 [CHANGELOG.md](CHANGELOG.md) 에 기록하며, 릴리즈는
+[GitHub Releases](https://github.com/picaqwe104/Stream_Overray/releases) 에 Windows 패키지를 첨부해 배포합니다.
+커밋 메시지는 [Conventional Commits](https://www.conventionalcommits.org/) 형식을 따릅니다.
+
 ## 라이선스
 
 MIT. 자세한 내용은 `LICENSE` 를 확인하세요.
