@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Attribution and the Riot Games "Legal Jibber Jabber" disclaimer for the bundled
+  League of Legends sample animation (`mia-ping-alpha.webm`).
+
 ### Changed
 - README now shows a download link to the latest release at the top.
 - The main `README.md` is now Korean; the English version moved to `README.en.md`.

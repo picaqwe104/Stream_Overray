@@ -114,6 +114,22 @@ Notable changes are recorded in [CHANGELOG.md](CHANGELOG.md), and each release i
 on the [GitHub Releases](https://github.com/picaqwe104/Stream_Overray/releases) page with the
 Windows package attached. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
 
+## Credits / Attribution
+
+The default sample overlay `mia-ping-alpha.webm` is the **"missing ping"
+(question-mark ping) animation from League of Legends**, which is the
+intellectual property of Riot Games, Inc. Obtained from (not the original
+source): [cromakeyuploader blog](https://cromakeyuploader.tistory.com/entry/%EB%A1%A4-%EB%AC%BC%EC%9D%8C%ED%91%9C-%ED%95%91-LOL-question-mark-green-screen).
+It is included only as a non-commercial fan sample under Riot Games'
+["Legal Jibber Jabber"](https://www.riotgames.com/en/legal) policy.
+
+> OBS Reaction Overlay was created under Riot Games' "Legal Jibber Jabber" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.
+
+⚠️ **Non-commercial use only** (no selling, donations, or crowdfunding). To use
+or redistribute this commercially, replace the sample with media you own or are
+licensed to use. See [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt). (Not legal advice.)
+
 ## License
 
-MIT. See `LICENSE`.
+The MIT license applies to **this project's code**; bundled media follows the
+Credits above. See `LICENSE`.

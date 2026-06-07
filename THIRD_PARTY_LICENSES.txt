@@ -107,3 +107,43 @@ package commercially or at large scale, review the full upstream license texts.
     credentials.json
     chzzk_tokens.json
     chzzk_auth_state.json
+
+  Note: the "commercial use" statement above covers the software components
+  (PyInstaller bootloader, Python runtime, permissive Python packages) only.
+  It does NOT cover the bundled sample media described in section 7.
+
+
+7. Bundled sample overlay media
+-------------------------------
+
+  sample-ping.svg
+    Simple original placeholder graphic, free to use with this project.
+
+  mia-ping-alpha.webm
+    The "missing ping" (question-mark ping) animation from the game
+    League of Legends. This animation and League of Legends are the
+    intellectual property of Riot Games, Inc.
+
+    Immediate source (green-screen re-upload; NOT the rights holder):
+      https://cromakeyuploader.tistory.com/entry/%EB%A1%A4-%EB%AC%BC%EC%9D%8C%ED%91%9C-%ED%95%91-LOL-question-mark-green-screen
+
+    Original work:
+      League of Legends (c) Riot Games, Inc.
+
+    This asset is bundled only as a NON-COMMERCIAL fan-project sample under
+    Riot Games' "Legal Jibber Jabber" policy:
+      https://www.riotgames.com/en/legal
+
+    Required disclaimer (confirm the exact, current wording on the policy page):
+
+      "OBS Reaction Overlay was created under Riot Games' 'Legal Jibber Jabber'
+       policy using assets owned by Riot Games. Riot Games does not endorse or
+       sponsor this project."
+
+    Riot's policy permits non-commercial fan use only. Do NOT use this project
+    commercially: no selling, no paid/app-store distribution, no crowdfunding,
+    and no donations or subscriptions tied to it (except donations enabled
+    during live gameplay streaming). If any of that applies to you, replace
+    this sample with media you own or are licensed to use.
+
+    This is a practical summary, not legal advice.

@@ -104,6 +104,14 @@ python server.py
 [GitHub Releases](https://github.com/picaqwe104/Stream_Overray/releases) 에 Windows 패키지를 첨부해 배포합니다.
 커밋 메시지는 [Conventional Commits](https://www.conventionalcommits.org/) 형식을 따릅니다.
 
+## 크레딧 / 저작권
+
+기본 샘플 오버레이 `mia-ping-alpha.webm` 는 **리그 오브 레전드(League of Legends)의 "미아핑(물음표 핑)" 애니메이션**으로, 저작권은 Riot Games, Inc. 에 있습니다. 받은 곳(원출처 아님): [cromakeyuploader 블로그](https://cromakeyuploader.tistory.com/entry/%EB%A1%A4-%EB%AC%BC%EC%9D%8C%ED%91%9C-%ED%95%91-LOL-question-mark-green-screen). 비영리 팬 샘플로만 포함했으며 Riot의 ["Legal Jibber Jabber"](https://www.riotgames.com/en/legal) 정책을 따릅니다.
+
+> OBS Reaction Overlay was created under Riot Games' "Legal Jibber Jabber" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.
+
+⚠️ **상업적 사용 불가**(판매·후원·크라우드펀딩 등). 상업적으로 쓰거나 재배포하려면 본인이 권리를 가진 미디어로 교체하세요. 자세한 내용은 [`THIRD_PARTY_LICENSES.txt`](THIRD_PARTY_LICENSES.txt) 참고. (법률 자문 아님)
+
 ## 라이선스
 
-MIT. 자세한 내용은 `LICENSE` 를 확인하세요.
+MIT 라이선스는 **이 프로젝트의 코드**에 적용됩니다. 번들된 미디어 저작권은 위 크레딧을 따릅니다. 자세한 내용은 `LICENSE` 를 확인하세요.
