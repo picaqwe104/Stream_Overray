@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>반응 오버레이 컨트롤</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f1214;
+        --panel: #181d20;
+        --panel-2: #20272b;
+        --panel-3: #111517;
+        --text: #f4f7f8;
+        --muted: #9ba8af;
+        --line: #303940;
+        --accent: #00e6b0;
+        --accent-soft: rgba(0, 230, 176, 0.12);
+        --blue: #78c7ff;
+        --danger: #ff7777;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      main {
+        width: min(1180px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 32px 0 48px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 22px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+        line-height: 1.2;
+      }
+
+      h2 {
+        font-size: 17px;
+      }
+
+      h3 {
+        font-size: 15px;
+      }
+
+      p,
+      .hint {
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .subtitle {
+        margin-top: 8px;
+      }
+
+      .status {
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 360px minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .side,
+      .content {
+        display: grid;
+        gap: 18px;
+        align-content: start;
+      }
+
+      section,
+      .overlay-card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .section-head p {
+        margin-top: 6px;
+      }
+
+      label {
+        display: grid;
+        gap: 7px;
+        margin-bottom: 14px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      input {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel-2);
+        color: var(--text);
+        padding: 11px 12px;
+        font-size: 15px;
+      }
+
+      input[type="file"] {
+        padding: 9px;
+      }
+
+      code {
+        display: block;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        margin-top: 10px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel-3);
+        color: var(--blue);
+        font-size: 13px;
+      }
+
+      button,
+      a.button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        border: 0;
+        border-radius: 6px;
+        padding: 0 13px;
+        background: var(--accent);
+        color: #031411;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      button.secondary,
+      a.button.secondary {
+        background: var(--panel-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      button.ghost {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      button.danger {
+        background: transparent;
+        color: var(--danger);
+        border: 1px solid rgba(255, 119, 119, 0.5);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .field-row.three {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .mode-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .mode-row label,
+      .check-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel-2);
+        color: var(--text);
+      }
+
+      .mode-row input,
+      .check-label input {
+        width: auto;
+      }
+
+      .hint {
+        margin-top: 8px;
+        font-size: 13px;
+      }
+
+      .overlay-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .overlay-card {
+        background:
+          linear-gradient(180deg, var(--accent-soft), transparent 92px),
+          var(--panel);
+      }
+
+      .overlay-card .section-head {
+        margin-bottom: 14px;
+      }
+
+      .asset-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 230px;
+        gap: 12px;
+        align-items: end;
+      }
+
+      .trigger-list {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .trigger-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+      }
+
+      .trigger-row input {
+        margin: 0;
+      }
+
+      .footer-actions {
+        position: sticky;
+        bottom: 0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+        padding: 14px 0 0;
+        background: linear-gradient(180deg, transparent, var(--bg) 28%);
+      }
+
+      @media (max-width: 980px) {
+        .layout,
+        .field-row,
+        .field-row.three,
+        .asset-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .topbar,
+        .section-head {
+          display: grid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="topbar">
+        <div>
+          <h1>반응 오버레이 컨트롤</h1>
+          <p class="subtitle">OBS 브라우저 소스에 표시할 채팅 반응 오버레이를 설정합니다.</p>
+        </div>
+        <div class="status" id="status">설정 불러오는 중</div>
+      </div>
+
+      <form id="settings">
+        <div class="layout">
+          <div class="side">
+            <section>
+              <div class="section-head">
+                <div>
+                  <h2>OBS 연결</h2>
+                  <p>브라우저 소스 URL</p>
+                </div>
+              </div>
+              <code>http://127.0.0.1:39291/overlay</code>
+              <p class="hint">브라우저 소스의 크기와 위치가 랜덤 출현 범위입니다. VSeeFace 소스와 같은 크기로 맞춘 뒤 그룹화하세요.</p>
+              <div class="actions" style="margin-top: 14px">
+                <a class="button secondary" href="/overlay" target="_blank" rel="noreferrer">오버레이 열기</a>
+                <button type="button" id="test">첫 오버레이 테스트</button>
+              </div>
+            </section>
+
+            <section>
+              <div class="section-head">
+                <div>
+                  <h2>치지직 앱 정보</h2>
+                  <p>스트리머 PC에만 저장됩니다.</p>
+                </div>
+              </div>
+              <label>
+                Client ID
+                <input id="clientId" autocomplete="off" />
+              </label>
+              <label>
+                Client Secret
+                <input id="clientSecret" type="password" autocomplete="new-password" placeholder="저장 후 마스킹 표시" />
+              </label>
+              <label>
+                Redirect URI
+                <input id="redirectUri" />
+              </label>
+              <div class="actions">
+                <button type="button" id="saveCredentials">앱 정보 저장</button>
+                <a class="button secondary" href="/auth/chzzk/start" target="_blank" rel="noreferrer">치지직 로그인</a>
+              </div>
+              <p class="hint">앱 정보 저장 후 치지직 로그인을 진행해야 실제 채팅을 읽을 수 있습니다.</p>
+              <code id="chzzkStatus">상태 확인 중</code>
+              <div class="actions" style="margin-top: 10px">
+                <button type="button" id="connectChzzk">채팅 연결 시작</button>
+                <button type="button" class="secondary" id="reconnectChzzk">재연결</button>
+                <button type="button" class="secondary" id="disconnectChzzk">연결 중지</button>
+              </div>
+            </section>
+          </div>
+
+          <div class="content">
+            <section>
+              <div class="section-head">
+                <div>
+                  <h2>표시 방식</h2>
+                  <p>모든 오버레이에 공통 적용됩니다.</p>
+                </div>
+              </div>
+              <div class="mode-row">
+                <label>
+                  <input name="positionMode" type="radio" value="random" />
+                  랜덤 위치
+                </label>
+                <label>
+                  <input name="positionMode" type="radio" value="fixed" />
+                  고정 위치
+                </label>
+              </div>
+              <div class="field-row">
+                <label>
+                  X 좌표, 고정 위치용
+                  <input name="x" type="number" min="0" max="7680" step="1" />
+                </label>
+                <label>
+                  Y 좌표, 고정 위치용
+                  <input name="y" type="number" min="0" max="4320" step="1" />
+                </label>
+              </div>
+              <div class="field-row">
+                <label>
+                  너비
+                  <input name="width" type="number" min="40" max="1200" step="1" />
+                </label>
+                <label>
+                  높이
+                  <input name="height" type="number" min="40" max="1200" step="1" />
+                </label>
+              </div>
+              <div class="field-row three">
+                <label>
+                  가장자리 여백
+                  <input name="padding" type="number" min="0" max="1000" step="1" />
+                </label>
+                <label>
+                  한번에 보이는 개수
+                  <input name="maxVisible" type="number" min="1" max="20" step="1" />
+                </label>
+                <label>
+                  볼륨(%)
+                  <input name="volume" type="number" min="0" max="100" step="1" />
+                </label>
+              </div>
+            </section>
+
+            <section>
+              <div class="section-head">
+                <div>
+                  <h2>채팅 시뮬레이션</h2>
+                  <p>실제 치지직 연결 전 매칭을 확인합니다.</p>
+                </div>
+              </div>
+              <label>
+                테스트 채팅
+                <input id="chatContent" value="?" />
+              </label>
+              <div class="actions">
+                <button type="button" id="simulateChat">입력값 테스트</button>
+              </div>
+            </section>
+
+            <section>
+              <div class="section-head">
+                <div>
+                  <h2>반응 오버레이</h2>
+                  <p>오버레이와 반응 채팅을 원하는 만큼 추가합니다.</p>
+                </div>
+                <button type="button" id="addOverlay">오버레이 추가</button>
+              </div>
+              <p class="hint">지원 미디어: svg, webm, mp4, mov, gif, png, jpg, jpeg, webp. 반응 채팅은 정확히 같은 메시지에만 반응합니다.</p>
+              <div class="overlay-list" id="overlays"></div>
+            </section>
+          </div>
+        </div>
+
+        <div class="footer-actions">
+          <button type="submit">전체 설정 저장</button>
+        </div>
+      </form>
+    </main>
+
+    <template id="overlayTemplate">
+      <div class="overlay-card">
+        <div class="section-head">
+          <div>
+            <h3 class="overlay-title">오버레이</h3>
+            <p class="hint">채팅 문구가 정확히 일치하면 재생됩니다.</p>
+          </div>
+          <div class="actions">
+            <button type="button" class="secondary test-overlay">테스트</button>
+            <button type="button" class="danger remove-overlay">삭제</button>
+          </div>
+        </div>
+
+        <label>
+          오버레이명
+          <input class="overlay-name" placeholder="예: 샘플 핑" />
+        </label>
+
+        <div class="asset-row">
+          <label>
+            오버레이 이미지/동영상 파일명
+            <input class="overlay-asset" placeholder="assets 폴더 안 파일명" />
+          </label>
+          <label>
+            파일 업로드
+            <input class="overlay-upload" type="file" accept=".svg,.webm,.mp4,.mov,.gif,.png,.jpg,.jpeg,.webp" />
+          </label>
+        </div>
+
+        <label>
+          반응 채팅
+          <div class="trigger-list"></div>
+        </label>
+        <div class="actions">
+          <button type="button" class="ghost add-trigger">반응 채팅 추가</button>
+        </div>
+
+        <label class="check-label" style="margin-top: 14px">
+          <input class="overlay-enabled" type="checkbox" />
+          이 오버레이 사용
+        </label>
+      </div>
+    </template>
+
+    <script>
+      const form = document.getElementById("settings");
+      const status = document.getElementById("status");
+      const overlaysContainer = document.getElementById("overlays");
+      const template = document.getElementById("overlayTemplate");
+
+      function setStatus(message) {
+        status.textContent = message;
+      }
+
+      function makeId(name) {
+        return (
+          name
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]+/g, "-")
+            .replace(/^-+|-+$/g, "") || `overlay-${Date.now()}`
+        );
+      }
+
+      function addTriggerRow(list, value = "") {
+        const row = document.createElement("div");
+        row.className = "trigger-row";
+        row.innerHTML = `
+          <input class="trigger-value" placeholder="예: ?" />
+          <button type="button" class="danger">삭제</button>
+        `;
+        row.querySelector(".trigger-value").value = value;
+        row.querySelector("button").addEventListener("click", () => row.remove());
+        list.appendChild(row);
+      }
+
+      function fillForm(settings) {
+        for (const [key, value] of Object.entries(settings)) {
+          const field = form.elements[key];
+          if (!field) continue;
+          if (field instanceof RadioNodeList) {
+            field.value = value;
+          } else {
+            field.value = value;
+          }
+        }
+
+        overlaysContainer.innerHTML = "";
+        settings.overlays.forEach((overlay) => addOverlayCard(overlay));
+      }
+
+      function addOverlayCard(overlay = {}) {
+        const card = template.content.firstElementChild.cloneNode(true);
+        const name = card.querySelector(".overlay-name");
+        const title = card.querySelector(".overlay-title");
+        const asset = card.querySelector(".overlay-asset");
+        const upload = card.querySelector(".overlay-upload");
+        const triggerList = card.querySelector(".trigger-list");
+        const enabled = card.querySelector(".overlay-enabled");
+
+        card.dataset.id = overlay.id || makeId(overlay.name || "overlay");
+        name.value = overlay.name || "새 오버레이";
+        asset.value = overlay.asset || "";
+        enabled.checked = overlay.enabled !== false;
+        title.textContent = name.value;
+
+        const triggers = Array.isArray(overlay.triggers) ? overlay.triggers : [];
+        if (triggers.length) {
+          triggers.forEach((trigger) => addTriggerRow(triggerList, trigger));
+        } else {
+          addTriggerRow(triggerList, "");
+        }
+
+        name.addEventListener("input", () => {
+          title.textContent = name.value || "오버레이";
+        });
+
+        card.querySelector(".add-trigger").addEventListener("click", () => {
+          addTriggerRow(triggerList, "");
+        });
+
+        upload.addEventListener("change", async () => {
+          if (!upload.files.length) return;
+          const body = new FormData();
+          body.append("file", upload.files[0]);
+          const response = await fetch("/api/assets", { method: "POST", body });
+          const result = await response.json();
+          if (!result.ok) {
+            setStatus(result.error || "업로드 실패");
+            return;
+          }
+          asset.value = result.asset;
+          setStatus(`${result.asset} 업로드됨`);
+        });
+
+        card.querySelector(".test-overlay").addEventListener("click", async () => {
+          await saveSettings();
+          await fetch("/api/test-ping", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ overlayId: card.dataset.id }),
+          });
+          setStatus(`${name.value} 테스트 재생 요청됨`);
+        });
+
+        card.querySelector(".remove-overlay").addEventListener("click", () => {
+          card.remove();
+          setStatus("오버레이 삭제됨. 저장해야 반영됩니다.");
+        });
+
+        overlaysContainer.appendChild(card);
+      }
+
+      function collectSettings() {
+        const body = Object.fromEntries(new FormData(form).entries());
+        body.overlays = [...overlaysContainer.querySelectorAll(".overlay-card")].map((card) => ({
+          id: card.dataset.id || makeId(card.querySelector(".overlay-name").value),
+          name: card.querySelector(".overlay-name").value,
+          asset: card.querySelector(".overlay-asset").value,
+          triggers: [...card.querySelectorAll(".trigger-value")]
+            .map((input) => input.value.trim())
+            .filter(Boolean),
+          enabled: card.querySelector(".overlay-enabled").checked,
+        }));
+        return body;
+      }
+
+      async function loadSettings() {
+        const response = await fetch("/api/settings");
+        const settings = await response.json();
+        fillForm(settings);
+      }
+
+      async function saveSettings() {
+        const response = await fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(collectSettings()),
+        });
+        const settings = await response.json();
+        fillForm(settings);
+        await loadChzzkStatus();
+        setStatus("설정 저장됨");
+      }
+
+      async function loadCredentials() {
+        const response = await fetch("/api/chzzk-credentials");
+        const credentials = await response.json();
+        document.getElementById("clientId").value = credentials.clientId || "";
+        document.getElementById("clientSecret").value = credentials.clientSecret || "";
+        document.getElementById("redirectUri").value = credentials.redirectUri || "";
+      }
+
+      function renderChzzkStatus(status) {
+        const lines = [
+          `앱 정보: ${status.credentialsConfigured ? "저장됨" : "미저장"}`,
+          `로그인: ${status.loggedIn ? "완료" : "필요"}`,
+          `상태값: ${status.connectionState || "-"}`,
+          `연결: ${status.connected ? "연결됨" : status.connecting ? "연결 중" : "끊김"}`,
+          `구독: ${status.subscribed ? "완료" : "대기"}`,
+          `상태: ${status.lastMessage || "-"}`,
+        ];
+        if (status.sessionKey) {
+          lines.push(`세션: ${status.sessionKey}`);
+        }
+        if (status.lastFrameAt) {
+          lines.push(`마지막 수신: ${new Date(status.lastFrameAt * 1000).toLocaleTimeString()}`);
+        }
+        if (status.lastPongAt) {
+          lines.push(`마지막 heartbeat: ${new Date(status.lastPongAt * 1000).toLocaleTimeString()}`);
+        }
+        if (status.lastChatAt) {
+          lines.push(`마지막 채팅: ${new Date(status.lastChatAt * 1000).toLocaleTimeString()}`);
+        }
+        if (status.reconnects) {
+          lines.push(`재연결 횟수: ${status.reconnects}`);
+        }
+        if (status.nextReconnectDelaySec) {
+          lines.push(`다음 재연결 대기: ${status.nextReconnectDelaySec}초`);
+        }
+        if (status.lastReconnectAt) {
+          lines.push(`마지막 재연결: ${new Date(status.lastReconnectAt * 1000).toLocaleTimeString()}`);
+        }
+        if (status.lastReconnectReason) {
+          lines.push(`재연결 사유: ${status.lastReconnectReason}`);
+        }
+        if (status.lastChat) {
+          lines.push(`최근 채팅: ${status.lastChat}`);
+        }
+        if (status.lastError) {
+          lines.push(`오류: ${status.lastError}`);
+        }
+        document.getElementById("chzzkStatus").textContent = lines.join("\n");
+      }
+
+      async function loadChzzkStatus() {
+        const response = await fetch("/api/chzzk-status");
+        renderChzzkStatus(await response.json());
+      }
+
+      async function saveCredentials() {
+        const response = await fetch("/api/chzzk-credentials", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: document.getElementById("clientId").value,
+            clientSecret: document.getElementById("clientSecret").value,
+            redirectUri: document.getElementById("redirectUri").value,
+          }),
+        });
+        const credentials = await response.json();
+        document.getElementById("clientSecret").value = credentials.clientSecret || "";
+        setStatus("치지직 앱 정보 저장됨");
+      }
+
+      async function simulateChat(content) {
+        await saveSettings();
+        const response = await fetch("/api/chat-simulate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content }),
+        });
+        const result = await response.json();
+        setStatus(result.ok ? `${content} 매칭됨` : `${content} 매칭 없음`);
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        saveSettings().catch((error) => setStatus(error.message));
+      });
+
+      document.getElementById("addOverlay").addEventListener("click", () => {
+        addOverlayCard({ id: makeId("overlay"), name: "새 오버레이", enabled: true, triggers: [""] });
+      });
+
+      document.getElementById("test").addEventListener("click", async () => {
+        await saveSettings();
+        await fetch("/api/test-ping", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}",
+        });
+        setStatus("첫 오버레이 테스트 재생 요청됨");
+      });
+
+      document.getElementById("simulateChat").addEventListener("click", () => {
+        simulateChat(document.getElementById("chatContent").value).catch((error) => setStatus(error.message));
+      });
+
+      document.getElementById("saveCredentials").addEventListener("click", () => {
+        saveCredentials().catch((error) => setStatus(error.message));
+      });
+
+      document.getElementById("connectChzzk").addEventListener("click", async () => {
+        const response = await fetch("/api/chzzk-connect", { method: "POST" });
+        renderChzzkStatus(await response.json());
+        setStatus("치지직 채팅 연결 시작");
+      });
+
+      document.getElementById("reconnectChzzk").addEventListener("click", async () => {
+        const response = await fetch("/api/chzzk-reconnect", { method: "POST" });
+        renderChzzkStatus(await response.json());
+        setStatus("치지직 채팅 재연결 시작");
+      });
+
+      document.getElementById("disconnectChzzk").addEventListener("click", async () => {
+        const response = await fetch("/api/chzzk-disconnect", { method: "POST" });
+        renderChzzkStatus(await response.json());
+        setStatus("치지직 채팅 연결 중지");
+      });
+
+      const events = new EventSource("/events");
+      events.onmessage = (message) => {
+        const event = JSON.parse(message.data);
+        if (event.type === "chzzk_status") {
+          renderChzzkStatus(event.status);
+        }
+      };
+
+      Promise.all([loadSettings(), loadCredentials(), loadChzzkStatus()])
+        .then(() => setStatus("서버 연결됨"))
+        .catch((error) => setStatus(error.message));
+    </script>
+  </body>
+</html>

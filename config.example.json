@@ -1,0 +1,23 @@
+{
+  "positionMode": "random",
+  "x": 1260,
+  "y": 360,
+  "width": 150,
+  "height": 150,
+  "padding": 24,
+  "maxVisible": 5,
+  "volume": 100,
+  "overlays": [
+    {
+      "id": "sample-ping",
+      "name": "Sample Ping",
+      "asset": "sample-ping.svg",
+      "triggers": [
+        "?",
+        "??",
+        "???"
+      ],
+      "enabled": true
+    }
+  ]
+}

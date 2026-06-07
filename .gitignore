@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+.codex-log/
+
+# Local agent/development-only files
+.codex/
+.github/
+AGENTS.md
+CLAUDE.md
+tests/
+requirements-dev.txt
+OBS_Reaction_Overlay.spec
+docs/
+
+# Local credentials and runtime state
+credentials.json
+chzzk_tokens.json
+chzzk_auth_state.json
+config.json
+
+# Build and release artifacts
+build/
+dist/
+*.spec.bak
+*.zip
+*.exe
+
+# Local/private overlay media. The public repository ships only the sample SVG.
+assets/*.webm
+assets/*.mp4
+assets/*.mov
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/

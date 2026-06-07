@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mia Ping Overlay</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      .overlay-asset {
+        position: absolute;
+        object-fit: contain;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      let settings = {
+        positionMode: "random",
+        x: 1260,
+        y: 360,
+        width: 150,
+        height: 150,
+        padding: 24,
+        maxVisible: 5,
+        volume: 100,
+        overlays: [],
+      };
+
+      const activeItems = [];
+      const debugMode = new URLSearchParams(window.location.search).has("debug");
+      let debugElement = null;
+      let sequence = 0;
+      let lastAction = "ready";
+
+      function randomBetween(min, max) {
+        return max <= min ? min : Math.random() * (max - min) + min;
+      }
+
+      function isVideo(asset) {
+        return /\.(webm|mp4|mov|ogg)$/i.test(asset);
+      }
+
+      function pickPosition(width, height) {
+        if (settings.positionMode === "fixed") {
+          return { x: Number(settings.x) || 0, y: Number(settings.y) || 0 };
+        }
+
+        const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        const padding = Math.max(0, Number(settings.padding) || 0);
+        const halfWidth = width / 2;
+        const halfHeight = height / 2;
+
+        return {
+          x: randomBetween(padding + halfWidth, viewportWidth - padding - halfWidth),
+          y: randomBetween(padding + halfHeight, viewportHeight - padding - halfHeight),
+        };
+      }
+
+      function updateDebug() {
+        if (!debugMode) {
+          return;
+        }
+        if (!debugElement) {
+          debugElement = document.createElement("pre");
+          debugElement.style.position = "fixed";
+          debugElement.style.left = "8px";
+          debugElement.style.top = "8px";
+          debugElement.style.zIndex = "999999";
+          debugElement.style.margin = "0";
+          debugElement.style.padding = "8px";
+          debugElement.style.borderRadius = "6px";
+          debugElement.style.background = "rgba(0, 0, 0, 0.72)";
+          debugElement.style.color = "#00ffae";
+          debugElement.style.font = "12px/1.4 Consolas, monospace";
+          document.body.appendChild(debugElement);
+        }
+        debugElement.textContent = [
+          "overlay build: 2026-05-20-simple-video-blob",
+          `active: ${activeItems.length}`,
+          `maxVisible: ${Math.max(1, Number(settings.maxVisible) || 1)}`,
+          `last: ${lastAction}`,
+          `items: ${activeItems.map((item) => item.id).join(", ") || "-"}`,
+        ].join("\n");
+      }
+
+      function removeItem(item, reason = "remove") {
+        if (!item || item.removed) {
+          return;
+        }
+        item.removed = true;
+
+        const index = activeItems.indexOf(item);
+        if (index >= 0) {
+          activeItems.splice(index, 1);
+        }
+
+        if (item.element) {
+          if (item.element.tagName === "VIDEO") {
+            item.element.pause();
+            item.element.removeAttribute("src");
+            item.element.load();
+          }
+          item.element.remove();
+        }
+        if (item.objectUrl) {
+          URL.revokeObjectURL(item.objectUrl);
+          item.objectUrl = "";
+        }
+
+        lastAction = `${reason}: ${item.id}`;
+        updateDebug();
+      }
+
+      function trimActiveItems() {
+        const maxVisible = Math.max(1, Number(settings.maxVisible) || 1);
+        while (activeItems.length > maxVisible) {
+          removeItem(activeItems[0], "limit");
+        }
+      }
+
+      function placeElement(element, item) {
+        const width = Number(settings.width) || 150;
+        const height = Number(settings.height) || 150;
+        const position = pickPosition(width, height);
+
+        element.className = "overlay-asset";
+        element.style.left = `${position.x}px`;
+        element.style.top = `${position.y}px`;
+        element.style.width = `${width}px`;
+        element.style.height = `${height}px`;
+        element.style.zIndex = String(1000 + item.order);
+      }
+
+      async function loadVideo(item, assetUrl) {
+        const response = await fetch(`${assetUrl}?instance=${encodeURIComponent(item.id)}`, {
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        item.objectUrl = URL.createObjectURL(await response.blob());
+        if (item.removed) {
+          URL.revokeObjectURL(item.objectUrl);
+          item.objectUrl = "";
+          return;
+        }
+
+        const video = item.element;
+        video.src = item.objectUrl;
+        video.preload = "auto";
+        video.playsInline = true;
+        video.autoplay = true;
+        video.loop = false;
+        video.volume = Math.max(0, Math.min(1, (Number(settings.volume) || 0) / 100));
+        video.muted = video.volume <= 0;
+        video.addEventListener("ended", () => removeItem(item, "ended"), { once: true });
+        video.addEventListener("error", () => removeItem(item, "error"), { once: true });
+        await video.play();
+      }
+
+      function playOverlay(event) {
+        settings = { ...settings, ...event.settings };
+
+        const overlay = event.overlay;
+        const assetUrl = `/assets/${encodeURIComponent(overlay.asset)}`;
+        const item = {
+          id: `overlay-${++sequence}`,
+          order: sequence,
+          element: document.createElement(isVideo(overlay.asset) ? "video" : "img"),
+          objectUrl: "",
+          removed: false,
+        };
+
+        activeItems.push(item);
+        trimActiveItems();
+        placeElement(item.element, item);
+        document.body.appendChild(item.element);
+
+        if (isVideo(overlay.asset)) {
+          loadVideo(item, assetUrl).catch(() => removeItem(item, "play-failed"));
+        } else {
+          item.element.src = assetUrl;
+        }
+
+        lastAction = `play: ${item.id}`;
+        updateDebug();
+      }
+
+      const events = new EventSource("/events");
+      events.onopen = () => {
+        lastAction = "events connected";
+        updateDebug();
+      };
+      events.onmessage = (message) => {
+        const event = JSON.parse(message.data);
+        if (event.type === "settings") {
+          settings = { ...settings, ...event.settings };
+          trimActiveItems();
+          updateDebug();
+        }
+        if (event.type === "play_overlay" || event.type === "play_ping") {
+          playOverlay(event);
+        }
+      };
+      events.onerror = () => {
+        lastAction = "events reconnecting";
+        updateDebug();
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,109 @@
+Third-party license summary
+===========================
+
+This package is built from this local Python application and several open-source
+Python/runtime components.
+
+This file is a practical summary, not legal advice. If you distribute this
+package commercially or at large scale, review the full upstream license texts.
+
+
+1. PyInstaller
+--------------
+
+  Version used:
+    6.20.0
+
+  License:
+    GPLv2-or-later with a special exception.
+
+  Practical meaning:
+    PyInstaller's license exception allows applications bundled with PyInstaller
+    to be distributed under a license of your choice, including non-free or
+    commercial licenses.
+
+  Source:
+    https://pyinstaller.org/en/stable/license.html
+    https://pypi.org/project/pyinstaller/
+
+
+2. Python runtime
+-----------------
+
+  Version used for build:
+    Python 3.13.4
+
+  License:
+    Python Software Foundation License.
+
+  Source:
+    https://docs.python.org/3.13/license.html
+
+
+3. requests
+-----------
+
+  Version used:
+    2.34.2
+
+  License:
+    Apache-2.0
+
+  Source:
+    https://pypi.org/project/requests/
+
+
+4. requests dependencies
+------------------------
+
+  urllib3
+    Version: 2.7.0
+    License: MIT
+
+  charset-normalizer
+    Version: 3.4.7
+    License: MIT
+
+  certifi
+    Version: 2025.6.15
+    License: MPL-2.0
+
+  idna
+    Version: 3.10
+    License: BSD-3-Clause style license
+
+
+5. PyInstaller build-time dependencies
+--------------------------------------
+
+  altgraph
+    License: MIT
+
+  packaging
+    License: Apache-2.0 OR BSD-2-Clause
+
+  pefile
+    License: MIT
+
+  pywin32-ctypes
+    License: BSD-3-Clause
+
+  pyinstaller-hooks-contrib
+    Used by PyInstaller during build.
+
+  setuptools
+    License: MIT
+
+
+6. Distribution note
+--------------------
+
+  The generated executable package may be redistributed, including for
+  commercial use, based on PyInstaller's bootloader/license exception and the
+  permissive licenses of the included Python packages.
+
+  Do not distribute a user's private files:
+
+    credentials.json
+    chzzk_tokens.json
+    chzzk_auth_state.json
