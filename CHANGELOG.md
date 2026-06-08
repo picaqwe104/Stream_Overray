@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-06-09
+
 ### Added
 - Per-overlay media pool: add several media files to one overlay and a random
   one plays on each trigger (single-media overlays are unchanged).
@@ -47,5 +49,6 @@ First public release.
   (`Make_Distribution_Zip.bat`); local credential and token files are excluded.
 - App version exposed via `/api/health` and the HTTP `Server` header.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/picaqwe104/Stream_Overray/releases/tag/v1.0.0
