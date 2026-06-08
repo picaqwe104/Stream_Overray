@@ -124,7 +124,7 @@ The **최근 반응** (recent reactions) panel shows, live, which chat triggered
 ## Versioning
 
 This project follows [Semantic Versioning](https://semver.org/) (`vMAJOR.MINOR.PATCH`).
-Notable changes are recorded in [CHANGELOG.md](CHANGELOG.md), and each release is published
+Notable changes are recorded in [CHANGELOG.en.md](CHANGELOG.en.md), and each release is published
 on the [GitHub Releases](https://github.com/picaqwe104/Stream_Overray/releases) page with the
 Windows package attached. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
 

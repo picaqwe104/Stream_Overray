@@ -1,53 +1,54 @@
-# Changelog
+# 변경 내역
 
-All notable changes to this project are documented in this file.
+이 프로젝트의 주요 변경 사항을 이 파일에 기록합니다.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
+버전은 [유의적 버전(SemVer)](https://semver.org/lang/ko/)을 따릅니다.
+
+[English changelog](CHANGELOG.en.md)
 
 ## [Unreleased]
 
 ## [1.1.0] - 2026-06-09
 
-### Added
-- Per-overlay media pool: add several media files to one overlay and a random
-  one plays on each trigger (single-media overlays are unchanged).
-- Reaction log on the control page: a live list of which chat message triggered
-  which overlay (and which media), kept in memory (last 50) and shown
-  immediately when the page opens. Simulated/test reactions appear too, so it
-  works without a CHZZK connection.
-- Per-overlay display override: optionally give an overlay its own size and
-  position (random/fixed) instead of the global values. Collapsed by default;
-  edge padding and max-visible stay global.
-- Overlays now clear within a few seconds when the server stops or the SSE
-  connection drops, so nothing lingers frozen on screen (a brief reconnect does
-  not wipe active reactions).
+### 추가
+- 오버레이별 미디어 풀: 한 오버레이에 여러 미디어를 등록하면 발동할 때마다
+  그중 하나가 랜덤으로 재생됩니다(미디어가 하나뿐인 오버레이는 동작이 동일합니다).
+- 컨트롤 페이지의 최근 반응 로그: 어떤 채팅이 어떤 오버레이(와 어떤 미디어)를
+  띄웠는지 실시간 목록으로 보여줍니다. 메모리에 최근 50개를 보관하며 페이지를
+  열면 곧바로 표시됩니다. 테스트·시뮬레이션 반응도 함께 나오므로 치지직 연결
+  없이도 확인할 수 있습니다.
+- 오버레이별 표시 설정: 전역값 대신 해당 오버레이만의 크기·위치(랜덤/고정)를
+  따로 지정할 수 있습니다. 기본은 접혀 있으며, 가장자리 여백과 동시 표시 개수는
+  전역값을 유지합니다.
+- 서버가 멈추거나 SSE 연결이 끊기면 몇 초 안에 오버레이가 사라져 화면에 멈춘 채
+  남지 않습니다(짧은 재연결은 표시 중인 반응을 지우지 않습니다).
 
 ## [1.0.0] - 2026-06-08
 
-First public release.
+첫 공개 릴리즈입니다.
 
-### Added
-- Local OBS browser-source overlay that reacts to CHZZK chat: when a chat
-  message exactly matches a configured trigger phrase, the chosen media
-  (webm / mp4 / mov / gif / png / jpg / webp / svg) plays at a random or fixed
-  position inside the OBS browser source.
-- Control page to add overlays and configure triggers, media, position, size,
-  edge padding, volume, and how many show at once. A fresh install starts with
-  no overlays — you add your own media. Settings and connection status update
-  live over Server-Sent Events.
-- CHZZK OpenAPI integration: OAuth login, realtime session over Socket.IO
-  (Engine.IO v3), chat-event subscription, and automatic access-token refresh.
-- Resilient connection: a client-initiated heartbeat keeps the socket alive
-  during quiet chat, a watchdog reconnects only on genuinely stale sockets, and
-  reconnects use exponential backoff with jitter.
-- Overlays auto-hide so they never linger on screen (images after a few seconds;
-  videos when playback ends, with a safety timeout).
-- Localhost-only server with origin/referer checks on mutations, masked
-  credentials in API responses, and sanitized asset uploads.
-- Windows one-folder build (`Build_Windows_Exe.bat`) and shareable package ZIP
-  (`Make_Distribution_Zip.bat`); local credential and token files are excluded.
-- App version exposed via `/api/health` and the HTTP `Server` header.
+### 추가
+- 치지직 채팅에 반응하는 로컬 OBS 브라우저 소스 오버레이: 채팅 메시지가
+  설정한 트리거 문구와 정확히 일치하면 선택한 미디어
+  (webm / mp4 / mov / gif / png / jpg / webp / svg)를 OBS 브라우저 소스 안의
+  랜덤 또는 고정 위치에 재생합니다.
+- 오버레이를 추가하고 트리거·미디어·위치·크기·가장자리 여백·볼륨·동시 표시
+  개수를 설정하는 컨트롤 페이지. 새로 설치하면 오버레이가 하나도 없으며, 사용자가
+  직접 미디어를 추가합니다. 설정과 연결 상태는 Server-Sent Events로 실시간
+  갱신됩니다.
+- 치지직 OpenAPI 연동: OAuth 로그인, Socket.IO(Engine.IO v3) 기반 실시간 세션,
+  채팅 이벤트 구독, 액세스 토큰 자동 갱신.
+- 안정적인 연결: 채팅이 조용할 때도 클라이언트가 직접 보내는 하트비트로 소켓을
+  유지하고, 워치독은 정말로 끊긴 소켓일 때만 재연결하며, 재연결은 지터를 더한
+  지수 백오프로 동작합니다.
+- 오버레이는 화면에 남지 않도록 자동으로 사라집니다(이미지는 몇 초 뒤, 영상은
+  재생이 끝날 때, 안전 타임아웃 포함).
+- 로컬 전용 서버: 변경 요청에 Origin/Referer 검사를 적용하고, API 응답에서
+  자격 증명을 가리며, 업로드 파일명을 정리합니다.
+- Windows 단일 폴더 빌드(`Build_Windows_Exe.bat`)와 공유용 패키지 ZIP
+  (`Make_Distribution_Zip.bat`); 로컬 자격 증명·토큰 파일은 제외됩니다.
+- 앱 버전을 `/api/health` 와 HTTP `Server` 헤더로 노출합니다.
 
 [Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.0.0...v1.1.0
