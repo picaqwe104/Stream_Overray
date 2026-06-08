@@ -86,12 +86,15 @@ button does anything.
 3. **Upload** an image/video, or drop a file into the `assets` folder and type its filename.
    - Supported: `svg, webm, mp4, mov, gif, png, jpg, jpeg, webp`
    - You can test with the included `sample-ping.svg`.
+   - Add several with **미디어 추가** (add media) and a **random** one plays on each trigger.
 4. Add **trigger phrases**, one per line (e.g. `?`, `??`). A reaction fires only when chat **exactly matches** a phrase.
 5. Tick **이 오버레이 사용** (use this overlay).
 6. Click **전체 설정 저장** (save all settings).
 7. Use **입력값 테스트** (test) to confirm it appears in OBS.
 
 The **표시 방식** (display) panel controls position (random/fixed), size, padding, volume, and how many show at once.
+Expand **개별 표시 설정** (per-overlay display) on an overlay card to give just that overlay its own size and position (unchecked = global values).
+The **최근 반응** (recent reactions) panel shows, live, which chat triggered which overlay.
 
 ## Screenshots
 

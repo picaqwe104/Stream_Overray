@@ -253,11 +253,115 @@
         margin-bottom: 14px;
       }
 
-      .asset-row {
+      .asset-list {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 230px;
-        gap: 12px;
-        align-items: end;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .asset-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+      }
+
+      .asset-item input {
+        margin: 0;
+      }
+
+      .asset-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .asset-actions .upload-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .reaction-log {
+        display: grid;
+        gap: 6px;
+        max-height: 280px;
+        overflow-y: auto;
+      }
+
+      .reaction-log .log-row {
+        display: grid;
+        gap: 2px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel-2);
+      }
+
+      .reaction-log .log-meta {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .reaction-log .log-main {
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+
+      .reaction-log .log-asset {
+        color: var(--accent);
+      }
+
+      .overlay-advanced {
+        margin-top: 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 10px 12px;
+        background: var(--panel-3);
+      }
+
+      .overlay-advanced > summary {
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 13px;
+        user-select: none;
+      }
+
+      .overlay-advanced .adv-badge {
+        display: none;
+        margin-left: 8px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 11px;
+      }
+
+      .overlay-advanced.is-custom .adv-badge {
+        display: inline-block;
+      }
+
+      .overlay-advanced .adv-fields {
+        margin-top: 10px;
+        display: none;
+      }
+
+      .overlay-advanced.is-custom .adv-fields {
+        display: block;
+      }
+
+      select {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel-2);
+        color: var(--text);
+        padding: 11px 12px;
+        font-size: 15px;
       }
 
       .trigger-list {
@@ -361,6 +465,18 @@
                 <button type="button" id="connectChzzk">채팅 연결 시작</button>
                 <button type="button" class="secondary" id="reconnectChzzk">재연결</button>
                 <button type="button" class="secondary" id="disconnectChzzk">연결 중지</button>
+              </div>
+            </section>
+
+            <section>
+              <div class="section-head">
+                <div>
+                  <h2>최근 반응</h2>
+                  <p>어떤 채팅에 무엇이 떴는지</p>
+                </div>
+              </div>
+              <div class="reaction-log" id="reactionLog">
+                <p class="hint">아직 기록이 없습니다.</p>
               </div>
             </section>
           </div>
@@ -473,12 +589,13 @@
           <input class="overlay-name" placeholder="예: 샘플 핑" />
         </label>
 
-        <div class="asset-row">
-          <label>
-            오버레이 이미지/동영상 파일명
-            <input class="overlay-asset" placeholder="assets 폴더 안 파일명" />
-          </label>
-          <label>
+        <label>
+          오버레이 미디어 <span class="hint" style="margin: 0">(여러 개면 발동마다 랜덤 재생)</span>
+          <div class="asset-list"></div>
+        </label>
+        <div class="asset-actions">
+          <button type="button" class="ghost add-asset">미디어 추가</button>
+          <label class="upload-label">
             파일 업로드
             <input class="overlay-upload" type="file" accept=".svg,.webm,.mp4,.mov,.gif,.png,.jpg,.jpeg,.webp" />
           </label>
@@ -491,6 +608,43 @@
         <div class="actions">
           <button type="button" class="ghost add-trigger">반응 채팅 추가</button>
         </div>
+
+        <details class="overlay-advanced">
+          <summary>개별 표시 설정<span class="adv-badge">개별 적용중</span></summary>
+          <label class="check-label" style="margin-top: 10px">
+            <input class="display-custom" type="checkbox" />
+            이 오버레이만 개별 크기·위치 사용 (안 하면 전역값)
+          </label>
+          <div class="adv-fields">
+            <div class="field-row">
+              <label>
+                너비
+                <input class="display-width" type="number" min="40" max="1200" step="1" />
+              </label>
+              <label>
+                높이
+                <input class="display-height" type="number" min="40" max="1200" step="1" />
+              </label>
+            </div>
+            <label>
+              위치
+              <select class="display-position">
+                <option value="random">랜덤 위치</option>
+                <option value="fixed">고정 위치</option>
+              </select>
+            </label>
+            <div class="field-row">
+              <label>
+                X 좌표 (고정 위치용)
+                <input class="display-x" type="number" min="0" max="7680" step="1" />
+              </label>
+              <label>
+                Y 좌표 (고정 위치용)
+                <input class="display-y" type="number" min="0" max="4320" step="1" />
+              </label>
+            </div>
+          </div>
+        </details>
 
         <label class="check-label" style="margin-top: 14px">
           <input class="overlay-enabled" type="checkbox" />
@@ -530,6 +684,18 @@
         list.appendChild(row);
       }
 
+      function addAssetRow(list, value = "") {
+        const row = document.createElement("div");
+        row.className = "asset-item";
+        row.innerHTML = `
+          <input class="asset-value" placeholder="assets 폴더 안 파일명 (예: mia-ping.webm)" />
+          <button type="button" class="danger" aria-label="미디어 삭제">삭제</button>
+        `;
+        row.querySelector(".asset-value").value = value;
+        row.querySelector("button").addEventListener("click", () => row.remove());
+        list.appendChild(row);
+      }
+
       function fillForm(settings) {
         for (const [key, value] of Object.entries(settings)) {
           const field = form.elements[key];
@@ -549,16 +715,28 @@
         const card = template.content.firstElementChild.cloneNode(true);
         const name = card.querySelector(".overlay-name");
         const title = card.querySelector(".overlay-title");
-        const asset = card.querySelector(".overlay-asset");
+        const assetList = card.querySelector(".asset-list");
         const upload = card.querySelector(".overlay-upload");
         const triggerList = card.querySelector(".trigger-list");
         const enabled = card.querySelector(".overlay-enabled");
 
         card.dataset.id = overlay.id || makeId(overlay.name || "overlay");
         name.value = overlay.name || "새 오버레이";
-        asset.value = overlay.asset || "";
         enabled.checked = overlay.enabled !== false;
         title.textContent = name.value;
+
+        // 미디어 풀(역호환): assets 우선, 없으면 단일 asset.
+        const assets =
+          Array.isArray(overlay.assets) && overlay.assets.length
+            ? overlay.assets
+            : overlay.asset
+              ? [overlay.asset]
+              : [];
+        if (assets.length) {
+          assets.forEach((mediaName) => addAssetRow(assetList, mediaName));
+        } else {
+          addAssetRow(assetList, "");
+        }
 
         const triggers = Array.isArray(overlay.triggers) ? overlay.triggers : [];
         if (triggers.length) {
@@ -567,12 +745,34 @@
           addTriggerRow(triggerList, "");
         }
 
+        // 개별 표시 설정(progressive disclosure): 기본 전역 따름, 체크 시 개별.
+        const advanced = card.querySelector(".overlay-advanced");
+        const displayCustom = card.querySelector(".display-custom");
+        const display =
+          overlay.display && typeof overlay.display === "object" ? overlay.display : { mode: "inherit" };
+        const isCustom = display.mode === "custom";
+        displayCustom.checked = isCustom;
+        advanced.classList.toggle("is-custom", isCustom);
+        if (isCustom) advanced.open = true;
+        card.querySelector(".display-width").value = display.width ?? "";
+        card.querySelector(".display-height").value = display.height ?? "";
+        card.querySelector(".display-position").value = display.positionMode === "fixed" ? "fixed" : "random";
+        card.querySelector(".display-x").value = display.x ?? "";
+        card.querySelector(".display-y").value = display.y ?? "";
+        displayCustom.addEventListener("change", () => {
+          advanced.classList.toggle("is-custom", displayCustom.checked);
+        });
+
         name.addEventListener("input", () => {
           title.textContent = name.value || "오버레이";
         });
 
         card.querySelector(".add-trigger").addEventListener("click", () => {
           addTriggerRow(triggerList, "");
+        });
+
+        card.querySelector(".add-asset").addEventListener("click", () => {
+          addAssetRow(assetList, "");
         });
 
         upload.addEventListener("change", async () => {
@@ -585,7 +785,8 @@
             setStatus(result.error || "업로드 실패");
             return;
           }
-          asset.value = result.asset;
+          addAssetRow(assetList, result.asset);
+          upload.value = "";
           setStatus(`${result.asset} 업로드됨`);
         });
 
@@ -609,15 +810,33 @@
 
       function collectSettings() {
         const body = Object.fromEntries(new FormData(form).entries());
-        body.overlays = [...overlaysContainer.querySelectorAll(".overlay-card")].map((card) => ({
-          id: card.dataset.id || makeId(card.querySelector(".overlay-name").value),
-          name: card.querySelector(".overlay-name").value,
-          asset: card.querySelector(".overlay-asset").value,
-          triggers: [...card.querySelectorAll(".trigger-value")]
+        body.overlays = [...overlaysContainer.querySelectorAll(".overlay-card")].map((card) => {
+          const assets = [...card.querySelectorAll(".asset-value")]
             .map((input) => input.value.trim())
-            .filter(Boolean),
-          enabled: card.querySelector(".overlay-enabled").checked,
-        }));
+            .filter(Boolean);
+          const useCustom = card.querySelector(".display-custom").checked;
+          const display = useCustom
+            ? {
+                mode: "custom",
+                positionMode: card.querySelector(".display-position").value,
+                width: Number(card.querySelector(".display-width").value) || undefined,
+                height: Number(card.querySelector(".display-height").value) || undefined,
+                x: Number(card.querySelector(".display-x").value) || undefined,
+                y: Number(card.querySelector(".display-y").value) || undefined,
+              }
+            : { mode: "inherit" };
+          return {
+            id: card.dataset.id || makeId(card.querySelector(".overlay-name").value),
+            name: card.querySelector(".overlay-name").value,
+            asset: assets[0] || "",
+            assets,
+            triggers: [...card.querySelectorAll(".trigger-value")]
+              .map((input) => input.value.trim())
+              .filter(Boolean),
+            enabled: card.querySelector(".overlay-enabled").checked,
+            display,
+          };
+        });
         return body;
       }
 
@@ -765,11 +984,56 @@
         setStatus("치지직 채팅 연결 중지");
       });
 
+      const reactionLogEl = document.getElementById("reactionLog");
+
+      function reactionLogRow(entry) {
+        const row = document.createElement("div");
+        row.className = "log-row";
+        const time = entry.at ? new Date(entry.at * 1000).toLocaleTimeString() : "";
+        const meta = [time, entry.nickname].filter(Boolean).join(" · ");
+        row.innerHTML = `
+          <div class="log-meta"></div>
+          <div class="log-main"><span class="log-chat"></span> → <span class="log-asset"></span></div>
+        `;
+        // 채팅 내용·닉네임은 textContent로 넣어 HTML 주입을 막는다.
+        row.querySelector(".log-meta").textContent = meta;
+        row.querySelector(".log-chat").textContent = entry.content || "(내용 없음)";
+        row.querySelector(".log-asset").textContent = entry.overlayName
+          ? `${entry.overlayName}${entry.asset ? ` (${entry.asset})` : ""}`
+          : entry.asset || "";
+        return row;
+      }
+
+      function renderReactionLog(entries) {
+        reactionLogEl.innerHTML = "";
+        if (!entries.length) {
+          reactionLogEl.innerHTML = `<p class="hint">아직 기록이 없습니다.</p>`;
+          return;
+        }
+        // 서버는 오래된→최신 순으로 보낸다. 최신이 위로 오도록 prepend.
+        entries.forEach((entry) => reactionLogEl.prepend(reactionLogRow(entry)));
+      }
+
+      function prependReactionLog(entry) {
+        const empty = reactionLogEl.querySelector(".hint");
+        if (empty) empty.remove();
+        reactionLogEl.prepend(reactionLogRow(entry));
+        while (reactionLogEl.children.length > 50) {
+          reactionLogEl.lastElementChild.remove();
+        }
+      }
+
       const events = new EventSource("/events");
       events.onmessage = (message) => {
         const event = JSON.parse(message.data);
         if (event.type === "chzzk_status") {
           renderChzzkStatus(event.status);
+        }
+        if (event.type === "reaction_log_init") {
+          renderReactionLog(event.entries || []);
+        }
+        if (event.type === "reaction_log") {
+          prependReactionLog(event.entry);
         }
       };
 

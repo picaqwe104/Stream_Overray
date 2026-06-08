@@ -41,6 +41,9 @@
       let debugElement = null;
       let sequence = 0;
       let lastAction = "ready";
+      // 서버/SSE가 끊기면 잠깐의 유예 뒤 화면을 비운다(앱 종료 시 잔상 방지).
+      let disconnectTimer = null;
+      const DISCONNECT_GRACE_MS = 3000;
 
       // 오버레이가 화면에 영원히 남지 않도록 하는 자동 숨김 시간.
       const IMAGE_DISPLAY_MS = 5000; // 이미지/GIF 등 자연 종료가 없는 자산은 이 시간 뒤 제거
@@ -54,9 +57,20 @@
         return /\.(webm|mp4|mov|ogg)$/i.test(asset);
       }
 
-      function pickPosition(width, height) {
-        if (settings.positionMode === "fixed") {
-          return { x: Number(settings.x) || 0, y: Number(settings.y) || 0 };
+      function effectiveField(field, display) {
+        // 개별(custom) 설정이 있으면 그 값을, 없으면 전역 settings를 쓴다. padding은 항상 전역.
+        if (display && display.mode === "custom" && display[field] != null) {
+          return display[field];
+        }
+        return settings[field];
+      }
+
+      function pickPosition(width, height, display) {
+        if (effectiveField("positionMode", display) === "fixed") {
+          return {
+            x: Number(effectiveField("x", display)) || 0,
+            y: Number(effectiveField("y", display)) || 0,
+          };
         }
 
         const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
@@ -137,10 +151,17 @@
         }
       }
 
-      function placeElement(element, item) {
-        const width = Number(settings.width) || 150;
-        const height = Number(settings.height) || 150;
-        const position = pickPosition(width, height);
+      function clearAllItems(reason = "clear") {
+        // activeItems는 removeItem에서 splice되므로 사본을 순회한다.
+        for (const item of [...activeItems]) {
+          removeItem(item, reason);
+        }
+      }
+
+      function placeElement(element, item, display) {
+        const width = Number(effectiveField("width", display)) || 150;
+        const height = Number(effectiveField("height", display)) || 150;
+        const position = pickPosition(width, height, display);
 
         element.className = "overlay-asset";
         element.style.left = `${position.x}px`;
@@ -200,7 +221,7 @@
 
         activeItems.push(item);
         trimActiveItems();
-        placeElement(item.element, item);
+        placeElement(item.element, item, overlay.display);
         document.body.appendChild(item.element);
 
         // 재생 후 일정 시간이 지나면 자동으로 제거(영원히 남는 문제 방지).
@@ -219,6 +240,11 @@
 
       const events = new EventSource("/events");
       events.onopen = () => {
+        // 재연결 성공 — 예약된 비우기를 취소한다(블립이었다는 뜻).
+        if (disconnectTimer) {
+          clearTimeout(disconnectTimer);
+          disconnectTimer = null;
+        }
         lastAction = "events connected";
         updateDebug();
       };
@@ -232,8 +258,20 @@
         if (event.type === "play_overlay" || event.type === "play_ping") {
           playOverlay(event);
         }
+        if (event.type === "clear") {
+          // 서버 정상 종료 시 보내는 신호 — 즉시 비운다.
+          clearAllItems("server-clear");
+        }
       };
       events.onerror = () => {
+        // 끊김 즉시가 아니라 유예 타이머로 비운다. 유예 안에 onopen 되면 취소되므로
+        // 순간 재연결(블립)에 멀쩡한 반응이 사라지지 않는다.
+        if (!disconnectTimer) {
+          disconnectTimer = setTimeout(() => {
+            disconnectTimer = null;
+            clearAllItems("disconnect");
+          }, DISCONNECT_GRACE_MS);
+        }
         lastAction = "events reconnecting";
         updateDebug();
       };

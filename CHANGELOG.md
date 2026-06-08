@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Per-overlay media pool: add several media files to one overlay and a random
+  one plays on each trigger (single-media overlays are unchanged).
+- Reaction log on the control page: a live list of which chat message triggered
+  which overlay (and which media), kept in memory (last 50) and shown
+  immediately when the page opens. Simulated/test reactions appear too, so it
+  works without a CHZZK connection.
+- Per-overlay display override: optionally give an overlay its own size and
+  position (random/fixed) instead of the global values. Collapsed by default;
+  edge padding and max-visible stay global.
+- Overlays now clear within a few seconds when the server stops or the SSE
+  connection drops, so nothing lingers frozen on screen (a brief reconnect does
+  not wipe active reactions).
+
 ## [1.0.0] - 2026-06-08
 
 First public release.
