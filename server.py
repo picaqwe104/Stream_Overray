@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import collections
 import hashlib
 import html
 import json
@@ -65,8 +66,10 @@ DEFAULT_OVERLAY = {
     "id": "overlay",
     "name": "오버레이",
     "asset": "sample-ping.svg",
+    "assets": [],
     "triggers": ["?"],
     "enabled": True,
+    "display": {"mode": "inherit"},
 }
 
 DEFAULT_CONFIG = {
@@ -83,6 +86,9 @@ DEFAULT_CONFIG = {
 
 clients: set[queue.Queue[str]] = set()
 clients_lock = threading.Lock()
+# 최근 반응 기록(메모리만, 파일 비저장). 컨트롤 페이지가 "어떤 채팅에 뭐가 떴나"를 본다.
+reaction_log = collections.deque(maxlen=50)
+reaction_log_lock = threading.Lock()
 chzzk_state = {
     "connectionState": "stopped",
     "connected": False,
@@ -118,8 +124,11 @@ def normalize_overlay(raw_overlay: dict, index: int = 0) -> dict:
     overlay["id"] = safe_id(str(overlay.get("id") or f"overlay-{index + 1}"))
     overlay["name"] = str(overlay.get("name") or "오버레이")
     overlay["asset"] = safe_asset_name(str(overlay.get("asset") or "sample-ping.svg"))
+    overlay["assets"] = normalize_assets(overlay.get("assets"), overlay["asset"])
+    overlay["asset"] = overlay["assets"][0]
     overlay["triggers"] = normalize_triggers(overlay.get("triggers"))
     overlay["enabled"] = bool(overlay.get("enabled", True))
+    overlay["display"] = normalize_display(overlay.get("display"))
     return overlay
 
 
@@ -425,6 +434,31 @@ def safe_asset_name(value: str) -> str:
     return Path(value).name
 
 
+def normalize_assets(value, fallback: str) -> list[str]:
+    # 미디어 풀: 항상 1개 이상. 비거나 잘못되면 단일 asset(또는 기본)으로 채운다.
+    if isinstance(value, list):
+        cleaned = [safe_asset_name(str(item).strip()) for item in value if str(item).strip()]
+        cleaned = [name for name in cleaned if name]
+    else:
+        cleaned = []
+    return cleaned or [fallback]
+
+
+def normalize_display(value) -> dict:
+    # 반응별 개별 표시 설정. 기본은 전역 따름(inherit). custom일 때만 크기·위치를 전역과 같은 범위로 clamp.
+    if not isinstance(value, dict) or value.get("mode") != "custom":
+        return {"mode": "inherit"}
+    position_mode = value.get("positionMode")
+    return {
+        "mode": "custom",
+        "positionMode": position_mode if position_mode in ("random", "fixed") else "random",
+        "x": clamp_number(value.get("x"), 0, 7680, DEFAULT_CONFIG["x"]),
+        "y": clamp_number(value.get("y"), 0, 4320, DEFAULT_CONFIG["y"]),
+        "width": clamp_number(value.get("width"), 40, 1200, DEFAULT_CONFIG["width"]),
+        "height": clamp_number(value.get("height"), 40, 1200, DEFAULT_CONFIG["height"]),
+    }
+
+
 def normalize_triggers(value) -> list[str]:
     if isinstance(value, str):
         parts = re.split(r"[\n,]+", value)
@@ -468,6 +502,12 @@ def guess_level(content: str, overlay: dict) -> int:
     return min(3, max(1, trigger_count))
 
 
+def choose_overlay_asset(overlay: dict) -> str:
+    # 발동마다 미디어 풀에서 랜덤 1개. 단일 asset이면 그대로.
+    assets = overlay.get("assets") or [overlay.get("asset", "sample-ping.svg")]
+    return random.choice(assets)
+
+
 def build_overlay_event(
     overlay_id: str | None = None,
     content: str | None = None,
@@ -480,6 +520,7 @@ def build_overlay_event(
     if content is not None and not overlay_matches(overlay, content):
         return None, "no_matching_overlay"
 
+    overlay = {**overlay, "asset": choose_overlay_asset(overlay)}
     level = guess_level(content or "", overlay)
     return (
         {
@@ -493,14 +534,32 @@ def build_overlay_event(
     )
 
 
+def log_reaction(event: dict, content: str | None, nickname: str | None, source: str | None) -> dict:
+    overlay = event.get("overlay") or {}
+    entry = {
+        "at": int(time.time()),
+        "nickname": nickname or source or "",
+        "content": content or "",
+        "overlayName": overlay.get("name", ""),
+        "asset": overlay.get("asset", ""),
+    }
+    with reaction_log_lock:
+        reaction_log.append(entry)
+    broadcast({"type": "reaction_log", "entry": entry})
+    return entry
+
+
 def trigger_overlay(
     overlay_id: str | None = None,
     content: str | None = None,
+    nickname: str | None = None,
+    source: str | None = None,
 ) -> tuple[bool, dict | None, str | None]:
     event, reason = build_overlay_event(overlay_id=overlay_id, content=content)
     if not event:
         return False, None, reason
     broadcast(event)
+    log_reaction(event, content=content, nickname=nickname, source=source)
     return True, event, None
 
 
@@ -815,7 +874,7 @@ def handle_socketio_message(message: str, access_token: str) -> None:
     if event_type == "CHAT":
         content = str(body.get("content", ""))
         nickname = ((body.get("profile") or {}).get("nickname")) or ""
-        ok, _, reason = trigger_overlay(content=content)
+        ok, _, reason = trigger_overlay(content=content, nickname=nickname)
         update_chzzk_state(
             lastChat=f"{nickname}: {content}" if nickname else content,
             lastChatAt=int(time.time()),
@@ -1180,7 +1239,7 @@ class PingOverlayHandler(BaseHTTPRequestHandler):
             body = self.read_json_body()
             if body is None:
                 return
-            self.play_overlay(overlay_id=body.get("overlayId"), force=True)
+            self.play_overlay(overlay_id=body.get("overlayId"), force=True, source="(테스트)")
             return
 
         if path == "/api/chat-simulate":
@@ -1188,7 +1247,7 @@ class PingOverlayHandler(BaseHTTPRequestHandler):
             if body is None:
                 return
             content = str(body.get("content", ""))
-            self.play_overlay(content=content)
+            self.play_overlay(content=content, source="(시뮬레이션)")
             return
 
         if path == "/api/chzzk-connect":
@@ -1322,27 +1381,15 @@ class PingOverlayHandler(BaseHTTPRequestHandler):
         overlay_id: str | None = None,
         content: str | None = None,
         force: bool = False,
+        source: str | None = None,
     ) -> None:
-        config = load_config()
-        overlay = find_overlay(config, overlay_id=overlay_id, content=content)
-        if overlay is None:
-            self.send_json({"ok": False, "reason": "no_overlay_configured"})
-            return
-
-        if content is not None and not overlay_matches(overlay, content):
-            self.send_json({"ok": False, "reason": "no_matching_overlay"})
-            return
-
-        level = guess_level(content or "", overlay)
-        event = {
-            "type": "play_overlay",
-            "level": level,
-            "settings": config,
-            "overlay": overlay,
-            "sentAt": time.time(),
-        }
-        broadcast(event)
-        self.send_json({"ok": True, "event": event})
+        # find/match/asset-pick/broadcast는 trigger_overlay 한 곳에 위임(랜덤 선택 단일화).
+        # force는 기존 시그니처 유지를 위해 받되 사용하지 않는다(content=None이면 매칭을 건너뜀).
+        ok, event, reason = trigger_overlay(overlay_id=overlay_id, content=content, source=source)
+        if ok:
+            self.send_json({"ok": True, "event": event})
+        else:
+            self.send_json({"ok": False, "reason": reason})
 
     def handle_events(self) -> None:
         client: queue.Queue[str] = queue.Queue(maxsize=100)
@@ -1362,6 +1409,10 @@ class PingOverlayHandler(BaseHTTPRequestHandler):
         self.wfile.write(f"data: {json.dumps(initial, ensure_ascii=False)}\n\n".encode("utf-8"))
         status = {"type": "chzzk_status", "status": get_chzzk_state()}
         self.wfile.write(f"data: {json.dumps(status, ensure_ascii=False)}\n\n".encode("utf-8"))
+        with reaction_log_lock:
+            log_entries = list(reaction_log)
+        log_init = {"type": "reaction_log_init", "entries": log_entries}
+        self.wfile.write(f"data: {json.dumps(log_init, ensure_ascii=False)}\n\n".encode("utf-8"))
         self.wfile.flush()
 
         try:
@@ -1450,7 +1501,15 @@ def main() -> None:
     print(f"OBS overlay URL:        http://{HOST}:{PORT}/overlay")
     if getattr(sys, "frozen", False) or os.environ.get("OPEN_CONTROL_ON_START") == "1":
         threading.Timer(1.0, lambda: webbrowser.open(f"http://{HOST}:{PORT}/control")).start()
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        # 정상 종료 시 오버레이에 비우기 신호를 보내 잔상을 즉시 없앤다(best-effort).
+        # 강제 종료는 못 잡지만, 그 경우엔 overlay.html이 SSE 끊김을 감지해 스스로 비운다.
+        broadcast({"type": "clear"})
+        time.sleep(0.3)  # 데몬 SSE 스레드가 프레임을 flush할 짧은 여유
 
 
 if __name__ == "__main__":
