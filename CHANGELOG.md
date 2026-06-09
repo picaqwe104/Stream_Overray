@@ -9,6 +9,21 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-09
+
+### 추가
+- 컨트롤 페이지 액션 피드백 **토스트**: 설정 저장·미디어 업로드·치지직 연결/재연결 등
+  동작의 성공/실패를 토스트로 알립니다. 성공·안내는 잠깐 떴다 사라지고, 실패는 사유와
+  짧은 코드(예: `SET-400`)를 함께 보여주며 직접 닫을 때까지 남습니다.
+- 컨트롤 페이지 푸터에 서버 버전 표시와 "업데이트했다면 OBS 브라우저 소스를
+  새로고침하세요" 안내. (overlay는 `?debug`/콘솔에 버전을 노출 — 구버전 캐시 진단용.)
+
+### 수정
+- 오버레이 개별 표시 설정에서 크기를 비워두면 기본 150이 아니라 **전역 크기를 상속**하도록
+  수정. 너비/높이 칸에 현재 전역값을 placeholder로 표시합니다.
+- 설정 저장이 실패해도 "설정 저장됨"으로 표시되고 에러 응답이 폼을 덮어쓰던 문제 수정 —
+  이제 실패하면 사유와 코드를 보여주고 폼은 건드리지 않습니다.
+
 ## [1.1.0] - 2026-06-09
 
 ### 추가
@@ -50,6 +65,7 @@
   (`Make_Distribution_Zip.bat`); 로컬 자격 증명·토큰 파일은 제외됩니다.
 - 앱 버전을 `/api/health` 와 HTTP `Server` 헤더로 노출합니다.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/picaqwe104/Stream_Overray/releases/tag/v1.0.0

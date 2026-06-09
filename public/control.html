@@ -88,6 +88,88 @@
         white-space: nowrap;
       }
 
+      /* 액션 피드백 토스트: 스크롤 위치와 무관하게 보이도록 화면 하단 중앙 고정 */
+      .toasts {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+        max-width: min(420px, calc(100vw - 32px));
+      }
+      .toast {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 11px 13px;
+        border: 1px solid var(--line);
+        background: var(--panel-2);
+        color: var(--text);
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.45;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .toast .toast-dot {
+        flex: none;
+        width: 8px;
+        height: 8px;
+        margin-top: 5px;
+        border-radius: 50%;
+        background: var(--muted);
+      }
+      .toast.success {
+        border-color: rgba(0, 230, 176, 0.5);
+      }
+      .toast.success .toast-dot {
+        background: var(--accent);
+      }
+      .toast.error {
+        border-color: rgba(255, 119, 119, 0.6);
+      }
+      .toast.error .toast-dot {
+        background: var(--danger);
+      }
+      .toast .toast-body {
+        flex: 1;
+      }
+      .toast .toast-close {
+        flex: none;
+        padding: 0 2px;
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .app-footer {
+        margin-top: 22px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 14px;
+        align-items: baseline;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .app-footer #appVersion {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .app-footer .footer-note strong {
+        color: var(--accent);
+      }
+
       .layout {
         display: grid;
         grid-template-columns: 360px minmax(0, 1fr);
@@ -569,7 +651,14 @@
           <button type="submit">전체 설정 저장</button>
         </div>
       </form>
+
+      <footer class="app-footer">
+        <span id="appVersion">버전 확인 중…</span>
+        <span class="footer-note">업데이트했다면 OBS 브라우저 소스를 <strong>새로고침</strong>하세요(소스 우클릭 → 새로고침). 안 그러면 예전 화면이 캐시돼 바뀐 게 안 보일 수 있어요.</span>
+      </footer>
     </main>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
 
     <template id="overlayTemplate">
       <div class="overlay-card">
@@ -656,11 +745,62 @@
     <script>
       const form = document.getElementById("settings");
       const status = document.getElementById("status");
+      const toasts = document.getElementById("toasts");
       const overlaysContainer = document.getElementById("overlays");
       const template = document.getElementById("overlayTemplate");
 
-      function setStatus(message) {
+      // 액션 피드백. type: "success" | "error" | "info"(기본).
+      // 성공/안내는 잠깐 떴다 사라지고, 실패는 코드를 읽고 직접 닫을 수 있게 오래 남긴다.
+      function setStatus(message, type = "info") {
         status.textContent = message;
+        if (!toasts) return;
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        const dot = document.createElement("span");
+        dot.className = "toast-dot";
+        const body = document.createElement("div");
+        body.className = "toast-body";
+        body.textContent = message;
+        const close = document.createElement("button");
+        close.type = "button";
+        close.className = "toast-close";
+        close.textContent = "×";
+        close.setAttribute("aria-label", "닫기");
+        const remove = () => toast.remove();
+        close.addEventListener("click", remove);
+        toast.append(dot, body, close);
+        toasts.appendChild(toast);
+        setTimeout(remove, type === "error" ? 12000 : 2800);
+        while (toasts.children.length > 4) toasts.firstElementChild.remove();
+      }
+
+      // mutation 요청 공통 처리. 실패 시 "사유 + 짧은 코드"가 담긴 Error를 던진다.
+      // tag로 어느 동작인지 구분(SET/CRED/UPLOAD/TEST/SIM/CONN). 코드는 항상 존재:
+      // HTTP 상태(예: SET-400), 네트워크 실패는 SET-NET.
+      async function requestJson(url, options, tag) {
+        let response;
+        try {
+          response = await fetch(url, options);
+        } catch (networkError) {
+          throw new Error(`서버에 연결할 수 없습니다. 서버 창이 켜져 있는지 확인하세요. [${tag}-NET]`);
+        }
+        if (!response.ok) {
+          let detail = "";
+          try {
+            const data = await response.clone().json();
+            detail = data.error || data.message || "";
+          } catch (_) {
+            try {
+              detail = (await response.clone().text()).trim().slice(0, 200);
+            } catch (_) {}
+          }
+          throw new Error(`${detail || "요청이 거부되었습니다."} [${tag}-${response.status}]`);
+        }
+        try {
+          return await response.json();
+        } catch (_) {
+          return {};
+        }
       }
 
       function makeId(name) {
@@ -754,8 +894,15 @@
         displayCustom.checked = isCustom;
         advanced.classList.toggle("is-custom", isCustom);
         if (isCustom) advanced.open = true;
-        card.querySelector(".display-width").value = display.width ?? "";
-        card.querySelector(".display-height").value = display.height ?? "";
+        // 빈 칸 = 전역값 상속. placeholder로 현재 전역 크기를 보여줘 "비우면 따라간다"를 알린다.
+        const globalWidth = Number(form.elements.width && form.elements.width.value) || 150;
+        const globalHeight = Number(form.elements.height && form.elements.height.value) || 150;
+        const widthInput = card.querySelector(".display-width");
+        const heightInput = card.querySelector(".display-height");
+        widthInput.value = display.width ?? "";
+        heightInput.value = display.height ?? "";
+        widthInput.placeholder = `전역값 ${globalWidth}`;
+        heightInput.placeholder = `전역값 ${globalHeight}`;
         card.querySelector(".display-position").value = display.positionMode === "fixed" ? "fixed" : "random";
         card.querySelector(".display-x").value = display.x ?? "";
         card.querySelector(".display-y").value = display.y ?? "";
@@ -779,25 +926,32 @@
           if (!upload.files.length) return;
           const body = new FormData();
           body.append("file", upload.files[0]);
-          const response = await fetch("/api/assets", { method: "POST", body });
-          const result = await response.json();
-          if (!result.ok) {
-            setStatus(result.error || "업로드 실패");
-            return;
+          try {
+            const result = await requestJson("/api/assets", { method: "POST", body }, "UPLOAD");
+            addAssetRow(assetList, result.asset);
+            upload.value = "";
+            setStatus(`${result.asset} 업로드됨`, "success");
+          } catch (error) {
+            setStatus("업로드 실패 — " + error.message, "error");
           }
-          addAssetRow(assetList, result.asset);
-          upload.value = "";
-          setStatus(`${result.asset} 업로드됨`);
         });
 
         card.querySelector(".test-overlay").addEventListener("click", async () => {
-          await saveSettings();
-          await fetch("/api/test-ping", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ overlayId: card.dataset.id }),
-          });
-          setStatus(`${name.value} 테스트 재생 요청됨`);
+          try {
+            await saveSettings();
+            await requestJson(
+              "/api/test-ping",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ overlayId: card.dataset.id }),
+              },
+              "TEST"
+            );
+            setStatus(`${name.value} 테스트 재생 요청됨`, "info");
+          } catch (error) {
+            setStatus("테스트 실패 — " + error.message, "error");
+          }
         });
 
         card.querySelector(".remove-overlay").addEventListener("click", () => {
@@ -847,15 +1001,20 @@
       }
 
       async function saveSettings() {
-        const response = await fetch("/api/settings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(collectSettings()),
-        });
-        const settings = await response.json();
+        // 실패하면 requestJson이 throw → fillForm/성공 표시를 건너뛰고 호출부가 에러를 잡는다.
+        const settings = await requestJson(
+          "/api/settings",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(collectSettings()),
+          },
+          "SET"
+        );
         fillForm(settings);
         await loadChzzkStatus();
-        setStatus("설정 저장됨");
+        // "저장됨"은 저장 왕복 성공까지의 뜻. OBS에 보이는지는 소스 새로고침이 좌우한다.
+        setStatus("설정 저장됨", "success");
       }
 
       async function loadCredentials() {
@@ -914,34 +1073,40 @@
       }
 
       async function saveCredentials() {
-        const response = await fetch("/api/chzzk-credentials", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            clientId: document.getElementById("clientId").value,
-            clientSecret: document.getElementById("clientSecret").value,
-            redirectUri: document.getElementById("redirectUri").value,
-          }),
-        });
-        const credentials = await response.json();
+        const credentials = await requestJson(
+          "/api/chzzk-credentials",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              clientId: document.getElementById("clientId").value,
+              clientSecret: document.getElementById("clientSecret").value,
+              redirectUri: document.getElementById("redirectUri").value,
+            }),
+          },
+          "CRED"
+        );
         document.getElementById("clientSecret").value = credentials.clientSecret || "";
-        setStatus("치지직 앱 정보 저장됨");
+        setStatus("치지직 앱 정보 저장됨", "success");
       }
 
       async function simulateChat(content) {
         await saveSettings();
-        const response = await fetch("/api/chat-simulate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content }),
-        });
-        const result = await response.json();
-        setStatus(result.ok ? `${content} 매칭됨` : `${content} 매칭 없음`);
+        const result = await requestJson(
+          "/api/chat-simulate",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content }),
+          },
+          "SIM"
+        );
+        setStatus(result.ok ? `${content} 매칭됨` : `${content} 매칭 없음`, result.ok ? "success" : "info");
       }
 
       form.addEventListener("submit", (event) => {
         event.preventDefault();
-        saveSettings().catch((error) => setStatus(error.message));
+        saveSettings().catch((error) => setStatus("저장 실패 — " + error.message, "error"));
       });
 
       document.getElementById("addOverlay").addEventListener("click", () => {
@@ -949,39 +1114,50 @@
       });
 
       document.getElementById("test").addEventListener("click", async () => {
-        await saveSettings();
-        await fetch("/api/test-ping", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: "{}",
-        });
-        setStatus("첫 오버레이 테스트 재생 요청됨");
+        try {
+          await saveSettings();
+          await requestJson("/api/test-ping", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }, "TEST");
+          setStatus("첫 오버레이 테스트 재생 요청됨", "info");
+        } catch (error) {
+          setStatus("테스트 실패 — " + error.message, "error");
+        }
       });
 
       document.getElementById("simulateChat").addEventListener("click", () => {
-        simulateChat(document.getElementById("chatContent").value).catch((error) => setStatus(error.message));
+        simulateChat(document.getElementById("chatContent").value).catch((error) =>
+          setStatus("시뮬레이션 실패 — " + error.message, "error")
+        );
       });
 
       document.getElementById("saveCredentials").addEventListener("click", () => {
-        saveCredentials().catch((error) => setStatus(error.message));
+        saveCredentials().catch((error) => setStatus("앱 정보 저장 실패 — " + error.message, "error"));
       });
 
       document.getElementById("connectChzzk").addEventListener("click", async () => {
-        const response = await fetch("/api/chzzk-connect", { method: "POST" });
-        renderChzzkStatus(await response.json());
-        setStatus("치지직 채팅 연결 시작");
+        try {
+          renderChzzkStatus(await requestJson("/api/chzzk-connect", { method: "POST" }, "CONN"));
+          setStatus("치지직 채팅 연결 시작", "info");
+        } catch (error) {
+          setStatus("연결 실패 — " + error.message, "error");
+        }
       });
 
       document.getElementById("reconnectChzzk").addEventListener("click", async () => {
-        const response = await fetch("/api/chzzk-reconnect", { method: "POST" });
-        renderChzzkStatus(await response.json());
-        setStatus("치지직 채팅 재연결 시작");
+        try {
+          renderChzzkStatus(await requestJson("/api/chzzk-reconnect", { method: "POST" }, "CONN"));
+          setStatus("치지직 채팅 재연결 시작", "info");
+        } catch (error) {
+          setStatus("재연결 실패 — " + error.message, "error");
+        }
       });
 
       document.getElementById("disconnectChzzk").addEventListener("click", async () => {
-        const response = await fetch("/api/chzzk-disconnect", { method: "POST" });
-        renderChzzkStatus(await response.json());
-        setStatus("치지직 채팅 연결 중지");
+        try {
+          renderChzzkStatus(await requestJson("/api/chzzk-disconnect", { method: "POST" }, "CONN"));
+          setStatus("치지직 채팅 연결 중지", "info");
+        } catch (error) {
+          setStatus("중지 실패 — " + error.message, "error");
+        }
       });
 
       const reactionLogEl = document.getElementById("reactionLog");
@@ -1037,9 +1213,21 @@
         }
       };
 
+      // 서버 버전을 푸터에 표시(컨트롤 페이지는 항상 최신 → OBS 캐시 점검의 기준점).
+      async function loadAppVersion() {
+        const el = document.getElementById("appVersion");
+        try {
+          const health = await (await fetch("/api/health")).json();
+          el.textContent = `OBS 반응 오버레이 v${health.version}`;
+        } catch (_) {
+          el.textContent = "OBS 반응 오버레이";
+        }
+      }
+
+      loadAppVersion();
       Promise.all([loadSettings(), loadCredentials(), loadChzzkStatus()])
-        .then(() => setStatus("서버 연결됨"))
-        .catch((error) => setStatus(error.message));
+        .then(() => setStatus("서버 연결됨", "success"))
+        .catch((error) => setStatus("서버 연결 실패 — " + error.message, "error"));
     </script>
   </body>
 </html>

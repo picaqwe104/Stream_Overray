@@ -24,6 +24,12 @@
   </head>
   <body>
     <script>
+      // 이 overlay.html이 어느 버전인지. OBS 브라우저 소스가 옛 페이지를 캐시하면
+      // 콘솔/?debug에 옛 버전이 찍혀 "새로고침 필요"를 알 수 있다. (화면 배너는 방송에
+      // 노출되므로 일부러 만들지 않음 — 진단은 콘솔/?debug로만.)
+      const OVERLAY_VERSION = "1.2.0";
+      console.log(`[OBS 반응 오버레이] overlay.html v${OVERLAY_VERSION}`);
+
       let settings = {
         positionMode: "random",
         x: 1260,
@@ -104,7 +110,7 @@
           document.body.appendChild(debugElement);
         }
         debugElement.textContent = [
-          "overlay build: 2026-06-07-auto-hide",
+          `overlay v${OVERLAY_VERSION}`,
           `active: ${activeItems.length}`,
           `maxVisible: ${Math.max(1, Number(settings.maxVisible) || 1)}`,
           `last: ${lastAction}`,

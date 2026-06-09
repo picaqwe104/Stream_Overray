@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-09
+
+### Added
+- Action-feedback **toasts** on the control page: saving settings, uploading
+  media, and CHZZK connect/reconnect now show a success/failure toast.
+  Success/info toasts auto-dismiss; failures show the reason plus a short code
+  (e.g. `SET-400`) and stay until dismissed.
+- The control-page footer shows the server version and a "refresh your OBS
+  browser source after updating" note. (The overlay logs its version to the
+  console / `?debug` to help spot a stale cache.)
+
+### Fixed
+- A per-overlay display size left blank now **inherits the global size** instead
+  of defaulting to 150; the width/height inputs show the current global value as
+  a placeholder.
+- Saving no longer reports "saved" on failure (and no longer lets an error
+  response overwrite the form): failures now show the reason and a code and
+  leave the form untouched.
+
 ## [1.1.0] - 2026-06-09
 
 ### Added
@@ -51,6 +70,7 @@ First public release.
   (`Make_Distribution_Zip.bat`); local credential and token files are excluded.
 - App version exposed via `/api/health` and the HTTP `Server` header.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/picaqwe104/Stream_Overray/releases/tag/v1.0.0

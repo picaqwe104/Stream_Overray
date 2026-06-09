@@ -109,6 +109,7 @@ The **최근 반응** (recent reactions) panel shows, live, which chat triggered
 ## Troubleshooting
 
 - Nothing in OBS → check the browser source URL is `http://127.0.0.1:39291/overlay`, then use **입력값 테스트**.
+- Updated but OBS looks unchanged → **refresh the OBS browser source** (right-click the source → Refresh). OBS can keep a cached old page so new behavior doesn't show.
 - No chat coming in → check the status reads connected/subscribed, click **재연결** (reconnect); if it still fails, log in again with **치지직 로그인**.
 - For detailed step-by-step instructions, see `README.txt` (Korean).
 

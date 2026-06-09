@@ -35,7 +35,7 @@ TOKENS_PATH = ROOT / "chzzk_tokens.json"
 AUTH_STATE_PATH = ROOT / "chzzk_auth_state.json"
 HOST = "127.0.0.1"
 PORT = 39291
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.2.0"
 OPENAPI_BASE_URL = "https://openapi.chzzk.naver.com"
 AUTH_URL = "https://chzzk.naver.com/account-interlock"
 SOCKET_READ_TIMEOUT_SEC = 10
@@ -445,18 +445,20 @@ def normalize_assets(value, fallback: str) -> list[str]:
 
 
 def normalize_display(value) -> dict:
-    # 반응별 개별 표시 설정. 기본은 전역 따름(inherit). custom일 때만 크기·위치를 전역과 같은 범위로 clamp.
+    # 반응별 개별 표시 설정. 기본은 전역 따름(inherit). custom일 때, 값이 있는 필드만
+    # 전역과 같은 범위로 clamp하고 비운 필드는 생략한다 → overlay.html이 그 필드는
+    # 전역값을 상속(빈 칸을 기본 150으로 떨어뜨리지 않음).
     if not isinstance(value, dict) or value.get("mode") != "custom":
         return {"mode": "inherit"}
     position_mode = value.get("positionMode")
-    return {
+    display = {
         "mode": "custom",
         "positionMode": position_mode if position_mode in ("random", "fixed") else "random",
-        "x": clamp_number(value.get("x"), 0, 7680, DEFAULT_CONFIG["x"]),
-        "y": clamp_number(value.get("y"), 0, 4320, DEFAULT_CONFIG["y"]),
-        "width": clamp_number(value.get("width"), 40, 1200, DEFAULT_CONFIG["width"]),
-        "height": clamp_number(value.get("height"), 40, 1200, DEFAULT_CONFIG["height"]),
     }
+    for field, lo, hi in (("x", 0, 7680), ("y", 0, 4320), ("width", 40, 1200), ("height", 40, 1200)):
+        if value.get(field) is not None:
+            display[field] = clamp_number(value.get(field), lo, hi, DEFAULT_CONFIG[field])
+    return display
 
 
 def normalize_triggers(value) -> list[str]:
