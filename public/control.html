@@ -969,14 +969,19 @@
             .map((input) => input.value.trim())
             .filter(Boolean);
           const useCustom = card.querySelector(".display-custom").checked;
+          // 빈 칸 = 전역값 상속(undefined). `|| undefined`는 0도 지워버려 X/Y 0을 못 쓴다.
+          const numberOrInherit = (selector) => {
+            const value = card.querySelector(selector).value.trim();
+            return value === "" ? undefined : Number(value);
+          };
           const display = useCustom
             ? {
                 mode: "custom",
                 positionMode: card.querySelector(".display-position").value,
-                width: Number(card.querySelector(".display-width").value) || undefined,
-                height: Number(card.querySelector(".display-height").value) || undefined,
-                x: Number(card.querySelector(".display-x").value) || undefined,
-                y: Number(card.querySelector(".display-y").value) || undefined,
+                width: numberOrInherit(".display-width"),
+                height: numberOrInherit(".display-height"),
+                x: numberOrInherit(".display-x"),
+                y: numberOrInherit(".display-y"),
               }
             : { mode: "inherit" };
           return {
@@ -1110,7 +1115,9 @@
       });
 
       document.getElementById("addOverlay").addEventListener("click", () => {
-        addOverlayCard({ id: makeId("overlay"), name: "새 오버레이", enabled: true, triggers: [""] });
+        // makeId("overlay")는 항상 "overlay"라 두 번 추가하면 id가 겹쳐
+        // 테스트 버튼이 첫 오버레이만 재생했다 — 추가 시점마다 고유 id를 만든다.
+        addOverlayCard({ id: `overlay-${Date.now()}`, name: "새 오버레이", enabled: true, triggers: [""] });
       });
 
       document.getElementById("test").addEventListener("click", async () => {

@@ -150,6 +150,17 @@ def normalize_config(raw_config: dict | None) -> dict:
     if not isinstance(overlays, list):
         overlays = []
     config["overlays"] = [normalize_overlay(item, index) for index, item in enumerate(overlays)]
+    # 테스트 버튼(/api/test-ping)은 id로 대상을 찾으므로 id가 겹치면 항상 첫 항목만
+    # 재생된다. 겹치는 뒤 항목에 -2, -3… 접미사를 붙여 고유하게 만든다.
+    seen_ids: set[str] = set()
+    for overlay in config["overlays"]:
+        unique_id = overlay["id"]
+        suffix = 2
+        while unique_id in seen_ids:
+            unique_id = f"{overlay['id']}-{suffix}"
+            suffix += 1
+        overlay["id"] = unique_id
+        seen_ids.add(unique_id)
     return config
 
 
@@ -203,7 +214,12 @@ def save_credentials(body: dict) -> dict:
     if client_id and set(client_id) == {"*"}:
         client_id = current.get("clientId", "")
     client_secret = str(body.get("clientSecret") or "")
-    if set(client_secret) == {"*"}:
+    # mask_secret은 끝 4자를 남기므로 전부 별표 검사로는 못 잡는다. 폼이 마스킹 값을
+    # 그대로 재전송한 경우(무수정 저장)에도 기존 시크릿을 유지한다.
+    if client_secret and (
+        set(client_secret) == {"*"}
+        or client_secret == mask_secret(current.get("clientSecret", ""))
+    ):
         client_secret = current.get("clientSecret", "")
 
     credentials = {
@@ -365,12 +381,13 @@ def build_health_status() -> dict:
 def is_local_request_url(value: str) -> bool:
     try:
         parsed = urlparse(value)
+        host = parsed.hostname or ""
+        port = parsed.port  # 비정상 포트 문자열이면 여기서 ValueError
     except ValueError:
         return False
-    host = parsed.hostname or ""
     if host not in {HOST, "localhost"}:
         return False
-    return parsed.port in {None, PORT}
+    return port in {None, PORT}
 
 
 def mask_secret(value: str) -> str:
@@ -1157,10 +1174,9 @@ def parse_multipart_upload(handler: BaseHTTPRequestHandler) -> tuple[str, bytes]
         if not filename_match:
             continue
         filename = safe_asset_name(filename_match.group(1))
-        file_blob = file_blob.rstrip(b"\r\n")
-        if file_blob.endswith(b"--"):
-            file_blob = file_blob[:-2]
-        return filename, file_blob
+        # 경계 직전의 CRLF 1개만 멀티파트 구분자다. rstrip을 쓰면 파일 자체가
+        # 줄바꿈으로 끝나는 경우 그 바이트까지 지워져 업로드가 손상된다.
+        return filename, file_blob.removesuffix(b"\r\n")
 
     raise ValueError("file field missing")
 
@@ -1350,6 +1366,9 @@ class PingOverlayHandler(BaseHTTPRequestHandler):
             normalize_overlay(overlay, index) for index, overlay in enumerate(overlays)
         ]
 
+        # 응답/브로드캐스트가 디스크 저장본과 같도록 여기서 정규화한다(중복 id 정리 포함).
+        # save_config만 정규화하면 클라이언트는 정리 전 id로 카드를 다시 그린다.
+        next_config = normalize_config(next_config)
         save_config(next_config)
         broadcast({"type": "settings", "settings": next_config})
         self.send_json(next_config)

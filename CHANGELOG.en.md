@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Re-saving the CHZZK app credentials without edits (e.g. changing only the
+  Redirect URI) stored the masked Client Secret shown in the form as the real
+  secret, silently breaking login and token refresh. Re-saving the masked
+  value now keeps the existing secret.
+- Overlays created with the "Add overlay" button all received the same id, so
+  the test button of the second and later overlays played the first overlay.
+  Saving now also de-duplicates ids automatically. (Live chat matching was
+  not affected.)
+- Uploaded media files ending in newline or `--` bytes lost those trailing
+  bytes.
+- Entering 0 for X/Y in an overlay's custom display settings was ignored and
+  fell back to the global values.
+- A malformed Origin header (e.g. an out-of-range port) closed the connection
+  without a response; it is now rejected with 403.
+
 ## [1.2.0] - 2026-06-09
 
 ### Added
