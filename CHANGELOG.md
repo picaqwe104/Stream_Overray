@@ -9,6 +9,8 @@
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-06-13
+
 ### 수정
 - 치지직 앱 정보를 수정 없이 다시 저장하면(예: Redirect URI만 변경) 폼에 표시된
   마스킹된 Client Secret이 실제 값으로 저장되어 로그인·토큰 갱신이 조용히 깨지던
@@ -79,7 +81,8 @@
   (`Make_Distribution_Zip.bat`); 로컬 자격 증명·토큰 파일은 제외됩니다.
 - 앱 버전을 `/api/health` 와 HTTP `Server` 헤더로 노출합니다.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/picaqwe104/Stream_Overray/releases/tag/v1.0.0
