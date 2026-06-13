@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-06-14
+
 ### Fixed
 - Clicking "test" on an overlay that has no media now shows an "add media first" notice
   instead of silently playing nothing (the package no longer bundles sample media).
@@ -120,7 +122,8 @@ First public release.
   (`Make_Distribution_Zip.bat`); local credential and token files are excluded.
 - App version exposed via `/api/health` and the HTTP `Server` header.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.2...HEAD
+[1.3.2]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...v1.2.1

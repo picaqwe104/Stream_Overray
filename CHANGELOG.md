@@ -9,6 +9,8 @@
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-06-14
+
 ### 수정
 - 미디어가 없는 오버레이로 "테스트"를 누르면(배포본에 샘플 미디어가 없어) 아무것도 안 뜨던
   것을, "먼저 미디어를 올리거나 파일명을 입력하세요" 안내를 띄우도록 했습니다.
@@ -110,7 +112,8 @@
   (`Make_Distribution_Zip.bat`); 로컬 자격 증명·토큰 파일은 제외됩니다.
 - 앱 버전을 `/api/health` 와 HTTP `Server` 헤더로 노출합니다.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.2...HEAD
+[1.3.2]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...v1.2.1
