@@ -7,5 +7,6 @@
   "padding": 24,
   "maxVisible": 5,
   "volume": 100,
+  "updateCheckEnabled": true,
   "overlays": []
 }

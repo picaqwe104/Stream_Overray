@@ -170,6 +170,51 @@
         color: var(--accent);
       }
 
+      .update-banner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 14px;
+        margin-bottom: 16px;
+        padding: 12px 16px;
+        border: 1px solid rgba(0, 230, 176, 0.5);
+        border-radius: 10px;
+        background: var(--accent-soft);
+        color: var(--text);
+        font-size: 14px;
+      }
+      .update-banner[hidden] {
+        display: none;
+      }
+      .update-banner strong {
+        color: var(--accent);
+      }
+      .update-banner a {
+        margin-left: auto;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #06231d;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .update-banner button {
+        background: none;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 6px 10px;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .update-banner .update-hint {
+        flex-basis: 100%;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .update-banner .update-hint strong {
+        color: var(--text);
+      }
+
       .layout {
         display: grid;
         grid-template-columns: 360px minmax(0, 1fr);
@@ -492,6 +537,12 @@
   </head>
   <body>
     <main>
+      <div class="update-banner" id="updateBanner" hidden>
+        <span id="updateBannerText"></span>
+        <a id="updateBannerLink" target="_blank" rel="noopener noreferrer">릴리스 페이지 열기</a>
+        <button type="button" id="updateBannerDismiss">나중에</button>
+        <small class="update-hint">새 버전을 기존 폴더에 덮어쓸 때 <strong>config.json · credentials.json · chzzk_tokens.json</strong> 은 그대로 두세요 — 설정과 로그인이 유지됩니다.</small>
+      </div>
       <div class="topbar">
         <div>
           <h1>반응 오버레이 컨트롤</h1>
@@ -1218,7 +1269,46 @@
         if (event.type === "reaction_log") {
           prependReactionLog(event.entry);
         }
+        if (event.type === "update_available") {
+          // 시작 시 확인이 헬스 1회 패치보다 늦게 끝나도 배너가 뜨도록 SSE로도 받는다.
+          renderUpdateBanner({
+            updateAvailable: true,
+            latestVersion: event.latestVersion,
+            releaseUrl: event.releaseUrl,
+          });
+        }
       };
+
+      // 새 버전 알림 배너. API에서 온 값은 textContent로만 렌더하고(innerHTML 금지),
+      // 링크는 https://github.com/ 으로 시작할 때만 연다(서버에서 이미 검증, 여기서도 재검증).
+      function renderUpdateBanner(update) {
+        const banner = document.getElementById("updateBanner");
+        if (!update || !update.updateAvailable || !update.releaseUrl) return;
+        const url = String(update.releaseUrl);
+        if (!url.startsWith("https://github.com/")) return;
+        const version = String(update.latestVersion || "");
+        try {
+          if (localStorage.getItem("dismissedUpdateVersion") === version) return;
+        } catch (_) {}
+
+        const text = document.getElementById("updateBannerText");
+        text.textContent = "🔔 새 버전 ";
+        const strong = document.createElement("strong");
+        strong.textContent = "v" + version;
+        text.append(strong, " 이 나왔어요");
+
+        document.getElementById("updateBannerLink").href = url;
+        banner.dataset.version = version;
+        banner.hidden = false;
+      }
+
+      document.getElementById("updateBannerDismiss").addEventListener("click", () => {
+        const banner = document.getElementById("updateBanner");
+        banner.hidden = true;
+        try {
+          localStorage.setItem("dismissedUpdateVersion", banner.dataset.version || "");
+        } catch (_) {}
+      });
 
       // 서버 버전을 푸터에 표시(컨트롤 페이지는 항상 최신 → OBS 캐시 점검의 기준점).
       async function loadAppVersion() {
@@ -1226,6 +1316,7 @@
         try {
           const health = await (await fetch("/api/health")).json();
           el.textContent = `OBS 반응 오버레이 v${health.version}`;
+          renderUpdateBanner(health.update);
         } catch (_) {
           el.textContent = "OBS 반응 오버레이";
         }

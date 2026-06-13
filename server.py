@@ -38,6 +38,12 @@ PORT = 39291
 APP_VERSION = "1.2.1"
 OPENAPI_BASE_URL = "https://openapi.chzzk.naver.com"
 AUTH_URL = "https://chzzk.naver.com/account-interlock"
+# 자동 업데이트는 "확인 + 알림"만 한다: 시작 시 공식 릴리스 API를 1회 확인하고,
+# 더 최신 버전이 있으면 컨트롤 페이지에 알린다. 코드는 절대 내려받거나 실행하지 않는다.
+# 저장소는 코드에 고정 — 런타임 입력에서 유도하지 않는다(변조 방지).
+UPDATE_REPO = "picaqwe104/Stream_Overray"
+UPDATE_CHECK_URL = f"https://api.github.com/repos/{UPDATE_REPO}/releases/latest"
+UPDATE_CHECK_TIMEOUT_SEC = 10
 SOCKET_READ_TIMEOUT_SEC = 10
 WATCHDOG_MIN_STALE_SEC = 90
 WATCHDOG_GRACE_SEC = 45
@@ -81,6 +87,7 @@ DEFAULT_CONFIG = {
     "padding": 24,
     "maxVisible": 5,
     "volume": 100,
+    "updateCheckEnabled": True,
     "overlays": [],
 }
 
@@ -114,6 +121,15 @@ chzzk_watchdog_thread: threading.Thread | None = None
 chzzk_websocket: SimpleWebSocket | None = None
 chzzk_stop_event = threading.Event()
 chzzk_lock = threading.Lock()
+# 시작 시 1회 채워지는 업데이트 확인 결과. 확인 전/실패면 updateAvailable=False.
+update_state = {
+    "currentVersion": APP_VERSION,
+    "latestVersion": "",
+    "updateAvailable": False,
+    "releaseUrl": "",
+    "checkedAt": 0,
+}
+update_lock = threading.Lock()
 
 
 def normalize_overlay(raw_overlay: dict, index: int = 0) -> dict:
@@ -145,6 +161,7 @@ def normalize_config(raw_config: dict | None) -> dict:
     config["padding"] = clamp_number(config.get("padding"), 0, 1000, DEFAULT_CONFIG["padding"])
     config["maxVisible"] = int(clamp_number(config.get("maxVisible"), 1, 20, DEFAULT_CONFIG["maxVisible"]))
     config["volume"] = int(clamp_number(config.get("volume"), 0, 100, DEFAULT_CONFIG["volume"]))
+    config["updateCheckEnabled"] = bool(config.get("updateCheckEnabled", True))
 
     overlays = config.get("overlays")
     if not isinstance(overlays, list):
@@ -345,12 +362,74 @@ def chzzk_error_requires_login(error_text: str) -> bool:
     return any(marker.lower() in lowered for marker in auth_markers)
 
 
+def parse_version(text: str) -> tuple[int, int, int] | None:
+    """'v1.2.1' 또는 '1.2.1' → (1, 2, 1). 형식이 아니면 None.
+    문자열 비교는 '1.2.1' < '1.10.0'을 오판하므로 반드시 튜플로 비교한다."""
+    match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", str(text).strip())
+    if not match:
+        return None
+    return tuple(int(group) for group in match.groups())
+
+
+def is_safe_github_url(url: str) -> bool:
+    """릴리스 링크를 열기 전 검증: https + github.com 호스트만 허용."""
+    try:
+        parsed = urlparse(str(url))
+    except ValueError:
+        return False
+    return parsed.scheme == "https" and parsed.netloc == "github.com"
+
+
+def get_update_state() -> dict:
+    with update_lock:
+        return dict(update_state)
+
+
+def check_for_update() -> None:
+    """시작 시 1회: 공식 릴리스 API로 최신 버전을 확인(외부 GET만, 코드 다운로드 없음).
+    원격이 로컬보다 높을 때만 알림. 오프라인/레이트리밋/형식 오류 등 모든 실패는 조용히 무시."""
+    try:
+        response = requests.get(
+            UPDATE_CHECK_URL,
+            timeout=UPDATE_CHECK_TIMEOUT_SEC,
+            headers={"User-Agent": f"OBSReactionOverlay/{APP_VERSION}"},
+        )
+        response.raise_for_status()
+        data = response.json()
+        release_url = str(data.get("html_url", ""))
+
+        latest = parse_version(data.get("tag_name", ""))
+        current = parse_version(APP_VERSION)
+        if not latest or not current or latest <= current:
+            return
+        if not is_safe_github_url(release_url):
+            return
+
+        latest_version = ".".join(str(part) for part in latest)
+        with update_lock:
+            update_state.update(
+                {
+                    "latestVersion": latest_version,
+                    "updateAvailable": True,
+                    "releaseUrl": release_url,
+                    "checkedAt": time.time(),
+                }
+            )
+        broadcast(
+            {"type": "update_available", "latestVersion": latest_version, "releaseUrl": release_url}
+        )
+    except Exception:
+        # 업데이트 확인 실패는 본 기능과 무관 — 서버 동작에 영향 없이 조용히 무시한다.
+        pass
+
+
 def build_health_status() -> dict:
     state = get_chzzk_state()
     config = load_config()
     return {
         "ok": True,
         "version": APP_VERSION,
+        "update": get_update_state(),
         "server": {
             "host": HOST,
             "port": PORT,
@@ -1515,7 +1594,10 @@ def unique_asset_name(filename: str) -> str:
 
 def main() -> None:
     ASSETS_DIR.mkdir(exist_ok=True)
-    load_config()
+    config = load_config()
+    if config.get("updateCheckEnabled", True):
+        # 서버 시작을 막지 않도록 데몬 스레드에서 1회 확인(실패해도 서버는 정상 기동).
+        threading.Thread(target=check_for_update, daemon=True).start()
     address = (HOST, PORT)
     server = ThreadingHTTPServer(address, PingOverlayHandler)
     print(f"Mia ping local server: http://{HOST}:{PORT}/control")
