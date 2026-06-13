@@ -902,6 +902,14 @@
         settings.overlays.forEach((overlay) => addOverlayCard(overlay));
       }
 
+      // 미디어가 없는 오버레이는 기본 자산(배포본에 없는 sample-ping.svg)으로 떨어져
+      // 테스트/발동 시 404가 난다. 테스트 전에 막고 안내한다.
+      function overlayMediaCount(card) {
+        return [...card.querySelectorAll(".asset-value")]
+          .map((input) => input.value.trim())
+          .filter(Boolean).length;
+      }
+
       function addOverlayCard(overlay = {}) {
         const card = template.content.firstElementChild.cloneNode(true);
         const name = card.querySelector(".overlay-name");
@@ -988,6 +996,10 @@
         });
 
         card.querySelector(".test-overlay").addEventListener("click", async () => {
+          if (overlayMediaCount(card) === 0) {
+            setStatus("이 오버레이에 미디어가 없어요. 먼저 파일을 올리거나 파일명을 입력한 뒤 테스트하세요.", "error");
+            return;
+          }
           try {
             await saveSettings();
             await requestJson(
@@ -1172,6 +1184,15 @@
       });
 
       document.getElementById("test").addEventListener("click", async () => {
+        const firstCard = overlaysContainer.querySelector(".overlay-card");
+        if (!firstCard) {
+          setStatus("먼저 오버레이를 추가하세요.", "error");
+          return;
+        }
+        if (overlayMediaCount(firstCard) === 0) {
+          setStatus("첫 오버레이에 미디어가 없어요. 먼저 파일을 올리거나 파일명을 입력한 뒤 테스트하세요.", "error");
+          return;
+        }
         try {
           await saveSettings();
           await requestJson("/api/test-ping", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }, "TEST");

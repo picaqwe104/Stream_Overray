@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Clicking "test" on an overlay that has no media now shows an "add media first" notice
+  instead of silently playing nothing (the package no longer bundles sample media).
+
 ## [1.3.1] - 2026-06-14
 
 ### Added
