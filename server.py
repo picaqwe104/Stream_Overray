@@ -122,12 +122,16 @@ chzzk_websocket: SimpleWebSocket | None = None
 chzzk_stop_event = threading.Event()
 chzzk_lock = threading.Lock()
 # 시작 시 1회 채워지는 업데이트 확인 결과. 확인 전/실패면 updateAvailable=False.
+# lastCheckStatus: "" 미실행 / "ok" 도달 성공(최신이어도 ok) / "error" 호출 실패.
+# 이 둘 덕분에 /api/health에서 "성공-최신"과 "조용한 실패"를 구분할 수 있다.
 update_state = {
     "currentVersion": APP_VERSION,
     "latestVersion": "",
     "updateAvailable": False,
     "releaseUrl": "",
     "checkedAt": 0,
+    "lastCheckStatus": "",
+    "lastCheckError": "",
 }
 update_lock = threading.Lock()
 
@@ -387,7 +391,12 @@ def get_update_state() -> dict:
 
 def check_for_update() -> None:
     """시작 시 1회: 공식 릴리스 API로 최신 버전을 확인(외부 GET만, 코드 다운로드 없음).
-    원격이 로컬보다 높을 때만 알림. 오프라인/레이트리밋/형식 오류 등 모든 실패는 조용히 무시."""
+    원격이 로컬보다 높을 때만 알림. 실패해도 서버 동작에 영향 없음.
+    성공/실패와 무관하게 checkedAt·lastCheckStatus를 항상 기록해, 도달했지만 최신인 경우와
+    조용히 실패한 경우를 /api/health에서 구분할 수 있게 한다."""
+    status = "error"
+    error_name = ""
+    found: tuple[str, str] | None = None
     try:
         response = requests.get(
             UPDATE_CHECK_URL,
@@ -396,31 +405,29 @@ def check_for_update() -> None:
         )
         response.raise_for_status()
         data = response.json()
+        status = "ok"  # GitHub에 도달해 응답을 받음(더 최신이 없어도 ok)
         release_url = str(data.get("html_url", ""))
-
         latest = parse_version(data.get("tag_name", ""))
         current = parse_version(APP_VERSION)
-        if not latest or not current or latest <= current:
-            return
-        if not is_safe_github_url(release_url):
-            return
+        if latest and current and latest > current and is_safe_github_url(release_url):
+            found = (".".join(str(part) for part in latest), release_url)
+    except Exception as exc:
+        # 예외 클래스명만 기록(URL/토큰 등 민감 정보 노출 방지). 서버는 정상 동작.
+        error_name = type(exc).__name__
 
-        latest_version = ".".join(str(part) for part in latest)
-        with update_lock:
-            update_state.update(
-                {
-                    "latestVersion": latest_version,
-                    "updateAvailable": True,
-                    "releaseUrl": release_url,
-                    "checkedAt": time.time(),
-                }
-            )
+    with update_lock:
+        update_state["checkedAt"] = time.time()
+        update_state["lastCheckStatus"] = status
+        update_state["lastCheckError"] = error_name
+        if found:
+            update_state["latestVersion"] = found[0]
+            update_state["updateAvailable"] = True
+            update_state["releaseUrl"] = found[1]
+
+    if found:
         broadcast(
-            {"type": "update_available", "latestVersion": latest_version, "releaseUrl": release_url}
+            {"type": "update_available", "latestVersion": found[0], "releaseUrl": found[1]}
         )
-    except Exception:
-        # 업데이트 확인 실패는 본 기능과 무관 — 서버 동작에 영향 없이 조용히 무시한다.
-        pass
 
 
 def build_health_status() -> dict:
@@ -429,7 +436,7 @@ def build_health_status() -> dict:
     return {
         "ok": True,
         "version": APP_VERSION,
-        "update": get_update_state(),
+        "update": {**get_update_state(), "updateCheckEnabled": bool(config.get("updateCheckEnabled", True))},
         "server": {
             "host": HOST,
             "port": PORT,

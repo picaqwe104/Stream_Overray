@@ -9,6 +9,17 @@
 
 ## [Unreleased]
 
+### 추가
+- `/api/health` 의 업데이트 확인 진단 필드(`lastCheckStatus`·`lastCheckError`·`checkedAt`·
+  `updateCheckEnabled`): 새 버전이 "없어서 안 뜸"인지 "확인에 실패"한 건지 구분할 수 있습니다.
+
+### 변경
+- 외부 통신 안내 문구를 실제 동작에 맞게 정정했습니다(로컬 서버 + 채팅을 읽기 위한 치지직
+  통신 + 시작 시 GitHub 버전 확인 1회, `updateCheckEnabled` 로 끔).
+- 배포 패키지를 더 가볍게: 미디어를 동봉하지 않고(빈 `assets/` 폴더), 활성 `config.json` 대신
+  참고용 `config.example.json` 만 넣습니다. 새 버전을 기존 폴더에 덮어써도 사용자의
+  `config.json`(설정)이 보존됩니다.
+
 ## [1.3.0] - 2026-06-13
 
 ### 추가

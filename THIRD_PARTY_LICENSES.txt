@@ -114,12 +114,13 @@ package commercially or at large scale, review the full upstream license texts.
 7. Sample / demo media
 ----------------------
 
-  sample-ping.svg
-    Simple original placeholder graphic, free to use with this project. This is
-    the only media file included in the package.
+  No media is bundled in the package: it ships with an empty assets/ folder and
+  an empty overlay list, and users add their own media through the control page.
 
-  No game assets are bundled. The initial overlay list is empty; users add their
-  own media through the control page.
+  (The source repository includes sample-ping.svg, a simple original placeholder
+  graphic free to use with this project, but it is not shipped in the package.)
+
+  No game assets are bundled.
 
   The demo GIFs in the repository's screenshots/ folder show the League of
   Legends "missing ping" animation (intellectual property of Riot Games, Inc.)

@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Update-check diagnostics in `/api/health` (`lastCheckStatus`, `lastCheckError`,
+  `checkedAt`, `updateCheckEnabled`), so "no banner because it's the latest" can be told
+  apart from "the check failed."
+
+### Changed
+- Corrected the external-traffic wording to match actual behavior (local server + talking
+  to CHZZK to read chat + a single GitHub version check on startup, disablable via
+  `updateCheckEnabled`).
+- Leaner distribution package: no bundled media (an empty `assets/` folder) and a reference
+  `config.example.json` instead of an active `config.json`. Overwriting an existing folder
+  with a new version now preserves the user's `config.json` (settings).
+
 ## [1.3.0] - 2026-06-13
 
 ### Added

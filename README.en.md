@@ -8,8 +8,10 @@ phrase appears in CHZZK chat.
 > Example: when a viewer types `?` in chat, an overlay you configured pops up on
 > screen for a moment.
 
-It runs **only on your own broadcasting PC** (`127.0.0.1`) and sends nothing to any
-external server.
+It runs as a local server **only on your own broadcasting PC** (`127.0.0.1`). Apart from
+talking to CHZZK to read your chat and a single version check to GitHub on startup, it
+sends no data (such as your overlay settings) to any external server. (Turn the version
+check off by setting `updateCheckEnabled` to `false` in `config.json`.)
 
 | Type `?` in chat → OBS | Control-page test button → OBS |
 |:---:|:---:|
@@ -85,7 +87,7 @@ button does anything.
 2. Enter an overlay **name** (for your own reference).
 3. **Upload** an image/video, or drop a file into the `assets` folder and type its filename.
    - Supported: `svg, webm, mp4, mov, gif, png, jpg, jpeg, webp`
-   - You can test with the included `sample-ping.svg`.
+   - Try a small image or short video first to test.
    - Add several with **미디어 추가** (add media) and a **random** one plays on each trigger.
 4. Add **trigger phrases**, one per line (e.g. `?`, `??`). A reaction fires only when chat **exactly matches** a phrase.
 5. Tick **이 오버레이 사용** (use this overlay).
