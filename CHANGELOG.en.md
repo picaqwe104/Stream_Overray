@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-13
+
+### Added
+- Update notification: on startup the server checks the official GitHub
+  releases once and, if a newer version exists, shows a banner at the top of
+  the control page. The banner's **Open release page** button opens the
+  official release page in a new tab. **The app never downloads or runs any
+  code** — it only shows a version string and a link. The banner also reminds
+  you not to overwrite `config.json` / `credentials.json` / `chzzk_tokens.json`
+  when replacing the folder (so your settings and login survive).
+- A setting to disable the update check (`updateCheckEnabled` in `config.json`,
+  on by default); when off, no external check is made at startup.
+
 ## [1.2.1] - 2026-06-13
 
 ### Fixed
@@ -88,7 +101,8 @@ First public release.
   (`Make_Distribution_Zip.bat`); local credential and token files are excluded.
 - App version exposed via `/api/health` and the HTTP `Server` header.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.0.0...v1.1.0

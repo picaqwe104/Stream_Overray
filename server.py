@@ -35,7 +35,7 @@ TOKENS_PATH = ROOT / "chzzk_tokens.json"
 AUTH_STATE_PATH = ROOT / "chzzk_auth_state.json"
 HOST = "127.0.0.1"
 PORT = 39291
-APP_VERSION = "1.2.1"
+APP_VERSION = "1.3.0"
 OPENAPI_BASE_URL = "https://openapi.chzzk.naver.com"
 AUTH_URL = "https://chzzk.naver.com/account-interlock"
 # 자동 업데이트는 "확인 + 알림"만 한다: 시작 시 공식 릴리스 API를 1회 확인하고,

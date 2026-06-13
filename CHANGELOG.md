@@ -9,6 +9,18 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-13
+
+### 추가
+- 새 버전 알림: 서버가 시작할 때 공식 GitHub 릴리스를 한 번 확인해서, 더 최신
+  버전이 있으면 컨트롤 페이지 상단에 배너로 알려줍니다. 배너의 **릴리스 페이지
+  열기**를 누르면 공식 릴리스 페이지가 새 탭으로 열립니다. **프로그램이 코드를
+  자동으로 내려받거나 실행하지는 않습니다** — 버전 안내와 링크만 보여줍니다.
+  배너에는 새 폴더로 교체할 때 `config.json`·`credentials.json`·`chzzk_tokens.json`
+  은 그대로 두라는 안내(설정·로그인 유지)도 함께 표시됩니다.
+- 업데이트 확인을 끄는 설정(`config.json` 의 `updateCheckEnabled`, 기본 켜짐).
+  끄면 시작 시 외부 확인을 아예 하지 않습니다.
+
 ## [1.2.1] - 2026-06-13
 
 ### 수정
@@ -81,7 +93,8 @@
   (`Make_Distribution_Zip.bat`); 로컬 자격 증명·토큰 파일은 제외됩니다.
 - 앱 버전을 `/api/health` 와 HTTP `Server` 헤더로 노출합니다.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.0.0...v1.1.0
