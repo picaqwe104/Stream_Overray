@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-06-14
+
 ### Added
 - Update-check diagnostics in `/api/health` (`lastCheckStatus`, `lastCheckError`,
   `checkedAt`, `updateCheckEnabled`), so "no banner because it's the latest" can be told
@@ -114,7 +116,8 @@ First public release.
   (`Make_Distribution_Zip.bat`); local credential and token files are excluded.
 - App version exposed via `/api/health` and the HTTP `Server` header.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...v1.2.0

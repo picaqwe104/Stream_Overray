@@ -9,6 +9,8 @@
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-06-14
+
 ### 추가
 - `/api/health` 의 업데이트 확인 진단 필드(`lastCheckStatus`·`lastCheckError`·`checkedAt`·
   `updateCheckEnabled`): 새 버전이 "없어서 안 뜸"인지 "확인에 실패"한 건지 구분할 수 있습니다.
@@ -104,7 +106,8 @@
   (`Make_Distribution_Zip.bat`); 로컬 자격 증명·토큰 파일은 제외됩니다.
 - 앱 버전을 `/api/health` 와 HTTP `Server` 헤더로 노출합니다.
 
-[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/picaqwe104/Stream_Overray/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/picaqwe104/Stream_Overray/compare/v1.1.0...v1.2.0
